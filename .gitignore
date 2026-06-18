@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+mahjong_auto_ORB_*.py
+mouse_tracker.py
