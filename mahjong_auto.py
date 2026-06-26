@@ -51,9 +51,9 @@ paused = False
 def _toggle_pause():
     global paused
     paused = not paused
-    print(f"\n{'=== 已暂停 (Ctrl+, 恢复) ===' if paused else '=== 已恢复 ==='}\n")
+    print(f"\n{'=== 已暂停 (Ctrl+. 恢复) ===' if paused else '=== 已恢复 ==='}\n")
 
-keyboard.add_hotkey('ctrl+comma', _toggle_pause)
+keyboard.add_hotkey('ctrl+.', _toggle_pause)
 
 # ===== 模板加载 =====
 
