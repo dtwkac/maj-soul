@@ -25,9 +25,6 @@ https://github.com/UB-Mannheim/tesseract/releases
 ## 使用
 
 ```bash
-$env:http_proxy="http://127.0.0.1:10808"
-$env:https_proxy="http://127.0.0.1:10808"
-$env:Path = "D:\portable\uv-x86_64-pc-windows-msvc;" + $env:Path
 uv run mahjong_auto.py
 ```
 
