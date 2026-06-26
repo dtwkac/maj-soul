@@ -1,0 +1,13 @@
+[project]
+name = "maj-soul"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "keyboard>=0.13.5",
+    "numpy>=2.5.0",
+    "opencv-python>=4.13.0.92",
+    "pyautogui>=0.9.54",
+    "pytesseract>=0.3.13",
+]

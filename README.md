@@ -14,14 +14,10 @@
 
 - Python 3.8+
 - Windows（使用了 `winsound`、`ctypes`、`keyboard` 等 Windows 特有库）
-- Tesseract-OCR 5.4.0+（安装路径 `C:\Program Files\Tesseract-OCR\tesseract.exe`）
+- Tesseract-OCR 5.4.0+
 - 屏幕分辨率 **1920×1080**，游戏窗口全屏
 
 ### 安装依赖
-
-```bash
-pip install opencv-python numpy pyautogui pytesseract keyboard pillow
-```
 
 安装 Tesseract-OCR（勾选中文简体包）：
 https://github.com/UB-Mannheim/tesseract/wiki
@@ -29,7 +25,12 @@ https://github.com/UB-Mannheim/tesseract/wiki
 ## 使用
 
 ```bash
-python mahjong_auto.py
+$env:http_proxy="http://127.0.0.1:10808"
+$env:https_proxy="http://127.0.0.1:10808"
+$env:Path = "D:\portable\uv-x86_64-pc-windows-msvc;" + $env:Path
+uv init
+uv add opencv-python numpy pyautogui pytesseract keyboard
+uv run mahjong_auto.py
 ```
 
 启动后有 10 秒倒计时，切换到游戏窗口即可。**鼠标移到屏幕四角可紧急停止**（pyautogui fail-safe）。
@@ -38,7 +39,7 @@ python mahjong_auto.py
 
 | 按键 | 功能 |
 |------|------|
-| `Ctrl+F3` | 切换 暂停 / 恢复 |
+| `Ctrl+,` | 切换 暂停 / 恢复 |
 | 鼠标移到四角 | 紧急停止（pyautogui.FAILSAFE） |
 | 关闭控制台窗口 | 停止程序 |
 
@@ -130,7 +131,7 @@ pics/
 
 1. 响三声警报（880Hz）
 2. 弹出 Windows 消息框提示
-3. 进入暂停状态（`Ctrl+F3` 恢复）
+3. 进入暂停状态（`Ctrl+,` 恢复）
 
 OCR 预处理：截图放大 3 倍 + Otsu 二值化。读到少于 3 位数字时跳过（避免 OCR 丢位误报）。
 

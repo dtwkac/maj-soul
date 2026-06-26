@@ -10,25 +10,25 @@ import keyboard
 import re
 import traceback
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe'
 pyautogui.FAILSAFE = True
 
 # ===== 屏幕坐标配置 =====
 TILE_REGION = (435, 875, 90, 153)   # 牌面截图区域 (left, top, width, height)
 NUM_REGION = (365, 805, 110, 30)    # 分数数字区域
 CENTER = (960, 540)                 # 屏幕中心（用于连点和鼠标复位）
-SELF_BTN = (1200, 815)              # 自摸按钮坐标
+SELF_BTN = (1200, 820)              # 自摸按钮坐标
 SKIP_BTN = (500, 950)               # 跳过按钮坐标
 
 # ===== 按键延迟配置（秒） =====
 CLICK_DELAY = 0.3   # 点自摸前停顿
 SKIP_DELAY = 0.5    # 点跳过前停顿
-CLICK_TIMES = 70    # 自摸后连点次数（7秒）
-LOOP_SLEEP = 2      # 主循环每次间隔
+CLICK_TIMES = 72    # 自摸后连点次数（7.2秒）
+LOOP_SLEEP = 1.5      # 主循环每次间隔
 
 # ===== 模板路径 =====
-TARGET_DIR = r'E:\maj\pics\targets'
-DISTRACTOR_DIR = r'E:\maj\pics\distractors'
+TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
+DISTRACTOR_DIR = r'D:\workspace\maj-soul\pics\distractors'
 TARGET_NAMES = {'1m', '9m', '9s', '1p', '9p', 'dong'}
 
 # ===== 特征匹配阈值 =====
@@ -42,8 +42,8 @@ CONF_STRICT = {
 }
 
 # ===== 分数报警阈值 =====
-# cur < max * 2/3 时触发报警暂停
-NUM_ALARM_RATIO = 2 / 3
+# cur < max * NUM_ALARM_RATIO 时触发报警暂停
+NUM_ALARM_RATIO = 110 / 184
 
 # ===== 暂停控制 =====
 paused = False
@@ -51,9 +51,9 @@ paused = False
 def _toggle_pause():
     global paused
     paused = not paused
-    print(f"\n{'=== 已暂停 (Ctrl+F3 恢复) ===' if paused else '=== 已恢复 ==='}\n")
+    print(f"\n{'=== 已暂停 (Ctrl+, 恢复) ===' if paused else '=== 已恢复 ==='}\n")
 
-keyboard.add_hotkey('ctrl+f3', _toggle_pause)
+keyboard.add_hotkey('ctrl+comma', _toggle_pause)
 
 # ===== 模板加载 =====
 
@@ -138,8 +138,8 @@ def _check_number():
         cur_str, max_str = m.group(1), m.group(2)
         cur, maxv = int(cur_str), int(max_str)
         score = f"{cur}/{maxv}"
-        # 确保读到了完整的3位数，再判断是否低于 2/3
-        if len(cur_str) >= 3 and cur < maxv * NUM_ALARM_RATIO:
+        # 判断是否低于报警分数
+        if cur < maxv * NUM_ALARM_RATIO:
             winsound.Beep(880, 300)
             time.sleep(0.2)
             winsound.Beep(880, 300)
