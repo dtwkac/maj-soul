@@ -13,6 +13,9 @@ import traceback
 pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe'
 pyautogui.FAILSAFE = True
 
+# ===== 分数报警阈值 =====
+NUM_ALARM = 110  # cur < NUM_ALARM 时触发报警暂停
+
 # ===== 屏幕坐标配置 =====
 TILE_REGION = (435, 875, 90, 153)   # 牌面截图区域 (left, top, width, height)
 NUM_REGION = (365, 805, 110, 30)    # 分数数字区域
@@ -32,7 +35,6 @@ DISTRACTOR_DIR = r'D:\workspace\maj-soul\pics\distractors'
 TARGET_NAMES = {'1m', '9m', '9s', '1p', '9p', 'dong'}
 
 # ===== 特征匹配阈值 =====
-# 最佳模板的好匹配数 >= 阈值时判定命中
 CONF_TARGET = 8
 CONF_STRICT = {
     '9s.JPG': 10,   # 9条易与7条混淆，提高阈值避免误触
@@ -40,10 +42,6 @@ CONF_STRICT = {
     '9p.JPG': 9,
     '9m.JPG': 5,    # 9万特征点偏少，单独降低
 }
-
-# ===== 分数报警阈值 =====
-# cur < max * NUM_ALARM_RATIO 时触发报警暂停
-NUM_ALARM_RATIO = 110 / 184
 
 # ===== 暂停控制 =====
 paused = False
@@ -135,22 +133,20 @@ def _check_number():
     ).strip()
     m = re.match(r'(\d+)/(\d+)', text)
     if m:
-        cur_str, max_str = m.group(1), m.group(2)
-        cur, maxv = int(cur_str), int(max_str)
-        score = f"{cur}/{maxv}"
-        # 判断是否低于报警分数
-        if cur < maxv * NUM_ALARM_RATIO:
+        cur = int(m.group(1))
+        score = text
+        if cur < NUM_ALARM:
             winsound.Beep(880, 300)
             time.sleep(0.2)
             winsound.Beep(880, 300)
             time.sleep(0.2)
             winsound.Beep(880, 600)
             ctypes.windll.user32.MessageBoxW(
-                0, f"分数={cur}/{maxv}，低于 {NUM_ALARM_RATIO:.0%}，程序暂停", "报警", 0
+                0, f"分数={cur}，低于 {NUM_ALARM}，程序暂停", "报警", 0
             )
             global paused
             paused = True
-            print(f"\n=== 分数 {cur}/{maxv} 低于 {NUM_ALARM_RATIO:.0%}，已暂停 (Ctrl+F3 恢复) ===\n")
+            print(f"\n=== 分数 {cur} 低于 {NUM_ALARM}，已暂停 (Ctrl+. 恢复) ===\n")
     else:
         score = '---'
     return score
