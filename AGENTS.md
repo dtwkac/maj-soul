@@ -8,13 +8,13 @@
 ## 关键命令
 ```bash
 uv sync                    # 安装依赖
-uv run mahjong_auto.py     # 运行主脚本
+uv run auto.py             # 运行主脚本
 uv run mouse_pos.py        # 坐标捕获工具（右键退出）
 # 无测试 / 无 lint / 无 typecheck / 无 CI
 ```
 
 ## 项目结构
-- `mahjong_auto.py` — 唯一生产入口，所有核心逻辑在此
+- `auto.py` — 唯一生产入口，所有核心逻辑在此
 - `mouse_pos.py` — 获取屏幕坐标的辅助工具（Tkinter 悬浮窗）
 - `main.py` — 空占位文件，无实际用途
 - `pics/targets/` — 目标牌模板（触发自摸）
@@ -31,5 +31,5 @@ uv run mouse_pos.py        # 坐标捕获工具（右键退出）
 ## 架构要点
 - 主循环无限运行，`try/except BaseException` 包裹，异常后 5s 自动继续
 - 每轮: 截图(90×153) → ORB BFMatcher(crossCheck, Hamming<50) → 最佳模板决策 → OCR 分数检测 → 自摸/跳过
-- 忽略 `mahjong_auto_ORB_*.py`、`mouse_tracker.py`（.gitignore 排除的旧文件）
+- 忽略 `mahjong_auto_ORB_*.py`、`auto_ORB_*.py`、`mouse_tracker.py`（.gitignore 排除的旧文件）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由

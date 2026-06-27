@@ -25,7 +25,7 @@ https://github.com/UB-Mannheim/tesseract/releases
 ## 使用
 
 ```bash
-uv run mahjong_auto.py
+uv run auto.py
 ```
 
 启动后有 10 秒倒计时，切换到游戏窗口即可。**鼠标移到屏幕四角可紧急停止**（pyautogui fail-safe）。
