@@ -21,10 +21,10 @@ SELF_BTN = (1200, 820)              # 自摸按钮坐标
 SKIP_BTN = (500, 950)               # 跳过按钮坐标
 
 # ===== 按键延迟配置（秒） =====
-CLICK_DELAY = 0.3   # 点自摸前停顿
-SKIP_DELAY = 0.5    # 点跳过前停顿
-CLICK_TIMES = 72    # 自摸后连点次数（7.2秒）
-LOOP_SLEEP = 1.5      # 主循环每次间隔
+CLICK_DELAY = 0.05   # 点自摸前停顿
+SKIP_DELAY = 0.05    # 点跳过前停顿
+CLICK_TIMES = 72     # 自摸后连点次数（7.2秒）
+LOOP_SLEEP = 1.2     # 主循环每次间隔
 
 # ===== 模板路径 =====
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
