@@ -43,6 +43,17 @@ CONF_STRICT = {
     '9m.JPG': 5,    # 9万特征点偏少，单独降低
 }
 
+# ===== 报警 =====
+
+def _alarm(msg):
+    """响三声警报 + 弹窗"""
+    winsound.Beep(880, 300)
+    time.sleep(0.2)
+    winsound.Beep(880, 300)
+    time.sleep(0.2)
+    winsound.Beep(880, 600)
+    ctypes.windll.user32.MessageBoxW(0, msg, "报警", 0)
+
 # ===== 暂停控制 =====
 paused = False
 
@@ -110,9 +121,7 @@ def _best_match(bgr, debug=True):
         print(f"未检测到牌面特征点，第{fail_count}次重试")
         if fail_count >= 10:
             fail_count = 0
-            ctypes.windll.user32.MessageBoxW(
-                0, "连续多次无法检测到牌面特征点，请检查游戏窗口", "警告", 0
-            )
+            _alarm("连续多次无法检测到牌面特征点，请检查游戏窗口")
         time.sleep(0.2)
         bgr = _capture()
 
@@ -159,27 +168,26 @@ def _check_number():
             if total != MAX_SCORE:
                 retry_count += 1
                 print(f"分数上限未稳定({total}/{MAX_SCORE})，第{retry_count}次重试")
+                if retry_count >= 10:
+                    retry_count = 0
+                    _alarm(f"分数上限持续异常")
                 if paused:
                     return '---'
-                time.sleep(0.1)
+                time.sleep(0.2)
                 continue
             retry_count = 0
             score = text
             if cur < NUM_ALARM:
-                winsound.Beep(880, 300)
-                time.sleep(0.2)
-                winsound.Beep(880, 300)
-                time.sleep(0.2)
-                winsound.Beep(880, 600)
-                ctypes.windll.user32.MessageBoxW(
-                    0, f"分数 {cur}，低于 {NUM_ALARM}!", "报警", 0
-                )
+                _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
             return score
         retry_count += 1
         print(f"未检测到分数，第{retry_count}次重试")
+        if retry_count >= 10:
+            retry_count = 0
+            _alarm("持续无法检测到分数，请检查游戏窗口")
         if paused:
             return '---'
-        time.sleep(0.1)
+        time.sleep(0.2)
 
 # ===== 点击动作 =====
 
