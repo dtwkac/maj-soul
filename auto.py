@@ -27,7 +27,7 @@ SKIP_BTN = (500, 950)               # 跳过按钮坐标
 CLICK_DELAY = 0.05   # 点自摸前停顿
 SKIP_DELAY = 0.05    # 点跳过前停顿
 CLICK_TIMES = 70     # 自摸后连点次数（7.0秒）
-LOOP_SLEEP = 1.2     # 主循环每次间隔
+LOOP_SLEEP = 1     # 主循环每次间隔
 
 # ===== 模板路径 =====
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
@@ -195,7 +195,6 @@ def _check_number():
             _alarm("分数持续异常")
         if paused:
             return '---'
-        print(f"分数不匹配({mismatch}) {text!r}，重试")
         time.sleep(0.2)
 
 # ===== 点击动作 =====
