@@ -14,7 +14,7 @@ pyautogui.FAILSAFE = True
 
 # ===== 分数报警阈值 =====
 NUM_ALARM = 105   # cur < NUM_ALARM 时触发报警暂停
-MAX_SCORE = 184   # 分数上限，动画未稳定时检测不到此值则继续重试
+MAX_SCORE = 184   # 分数上限，画面未完全更新时检测不到此值则继续重试
 
 # ===== 屏幕坐标配置 =====
 TILE_REGION = (435, 875, 90, 153)   # 牌面截图区域 (left, top, width, height)
@@ -130,7 +130,7 @@ def _best_match(bgr, debug=True):
 # ===== 分数检测 =====
 
 def _check_number():
-    """OCR 读取分数区域，低于阈值则报警；动画期间不断重试直到分数上限稳定为 MAX_SCORE"""
+    """OCR 读取分数区域，低于阈值则报警；画面未完全更新时不断重试直到读取到 MAX_SCORE"""
     while True:
         img = np.array(pyautogui.screenshot(region=NUM_REGION))
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -183,11 +183,8 @@ def _click_skip(info):
 
 # ===== 主循环 =====
 
-print("10秒后开始，请切换到游戏窗口...")
-for i in range(10, 0, -1):
-    print(f"\r倒计时 {i}s...  ", end='', flush=True)
-    time.sleep(1)
-print("\n开始!")
+ctypes.windll.user32.MessageBoxW(0, "请切换到游戏窗口，点击确认后开始运行", "准备就绪", 0)
+print("开始!")
 
 while True:
     try:
