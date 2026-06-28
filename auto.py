@@ -156,7 +156,7 @@ def _best_match(bgr, debug=True):
             mismatch = 0
             _alarm("牌面结果持续不一致")
         prev = cur
-        time.sleep(0.1)
+        time.sleep(0.2)
         bgr = _capture()
 
 # ===== 分数检测 =====
