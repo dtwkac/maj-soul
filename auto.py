@@ -153,7 +153,7 @@ def _best_match(bgr, debug=True):
         p_name, p_cnt, _ = prev or ('无', 0, False)
         p_label = p_name.replace('.JPG','') if p_name else '无'
         c_label = best_name.replace('.JPG','') if best_name else '无'
-        print(f"不匹配({mismatch}) 上次:{p_label}({p_cnt}) / 当前:{c_label}({best_cnt})，重试")
+        print(f"牌面不匹配({mismatch}) 上次:{p_label}({p_cnt}) / 当前:{c_label}({best_cnt})，重试")
         if mismatch >= 10:
             mismatch = 0
             _alarm("牌面结果持续不一致")
@@ -176,6 +176,7 @@ def _check_number():
             th, config='--psm 7 -c tessedit_char_whitelist=0123456789/'
         ).strip()
         m = re.match(r'(\d+)/(\d+)', text)
+        old = prev
         if m:
             cur = int(m.group(1))
             total = int(m.group(2))
@@ -187,6 +188,8 @@ def _check_number():
         else:
             prev = None
         mismatch += 1
+        p = f"{old[0]}/{old[1]}" if old else "无"
+        print(f"分数不匹配({mismatch}) 上次:{p} 当前:{text}，重试")
         if mismatch >= 10:
             mismatch = 0
             _alarm("分数持续异常")
