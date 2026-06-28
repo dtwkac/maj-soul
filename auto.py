@@ -143,6 +143,7 @@ def _best_match(bgr, debug=True):
 
 def _check_number():
     """OCR 读取分数区域，低于阈值则报警；画面未完全更新时不断重试直到读取到 MAX_SCORE"""
+    retry_count = 0
     while True:
         img = np.array(pyautogui.screenshot(region=NUM_REGION))
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -156,10 +157,13 @@ def _check_number():
             cur = int(m.group(1))
             total = int(m.group(2))
             if total != MAX_SCORE:
+                retry_count += 1
+                print(f"分数上限未稳定({total}/{MAX_SCORE})，第{retry_count}次重试")
                 if paused:
                     return '---'
                 time.sleep(0.1)
                 continue
+            retry_count = 0
             score = text
             if cur < NUM_ALARM:
                 winsound.Beep(880, 300)
@@ -171,6 +175,8 @@ def _check_number():
                     0, f"分数 {cur}，低于 {NUM_ALARM}!", "报警", 0
                 )
             return score
+        retry_count += 1
+        print(f"未检测到分数，第{retry_count}次重试")
         if paused:
             return '---'
         time.sleep(0.1)
