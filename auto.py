@@ -23,9 +23,7 @@ CENTER = (960, 540)                 # 屏幕中心（用于连点和鼠标复位
 SELF_BTN = (1200, 820)              # 自摸按钮坐标
 SKIP_BTN = (500, 950)               # 跳过按钮坐标
 
-# ===== 按键延迟配置（秒） =====
-CLICK_DELAY = 0.05   # 点自摸前停顿
-SKIP_DELAY = 0.05    # 点跳过前停顿
+# ===== 循环配置 =====
 CLICK_TIMES = 70     # 自摸后连点次数（7.0秒）
 LOOP_SLEEP = 1     # 主循环每次间隔
 
@@ -202,7 +200,6 @@ def _check_number():
 def _click_self(name_str, cnt, need):
     print(f"{name_str.replace('.JPG','')} 匹配={cnt}/{need} → 自摸")
     pyautogui.moveTo(*SELF_BTN)
-    time.sleep(CLICK_DELAY)
     pyautogui.click(*SELF_BTN)
     for _ in range(CLICK_TIMES):
         pyautogui.click(*CENTER)
@@ -211,7 +208,6 @@ def _click_self(name_str, cnt, need):
 def _click_skip(info):
     print(f"{info} → 跳过")
     pyautogui.moveTo(*SKIP_BTN)
-    time.sleep(SKIP_DELAY)
     pyautogui.click(*SKIP_BTN)
     pyautogui.moveTo(*CENTER)
 
