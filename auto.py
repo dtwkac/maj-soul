@@ -108,7 +108,7 @@ def _best_match(bgr, debug=True):
             return None, 0, False
         fail_count += 1
         print(f"未检测到牌面特征点，第{fail_count}次重试")
-        if fail_count >= 5:
+        if fail_count >= 10:
             fail_count = 0
             ctypes.windll.user32.MessageBoxW(
                 0, "连续多次无法检测到牌面特征点，请检查游戏窗口", "警告", 0
