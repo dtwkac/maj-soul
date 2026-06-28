@@ -26,10 +26,10 @@ uv run mouse_pos.py        # 坐标捕获工具（右键退出）
 - **Tesseract 路径**: 硬编码为 `D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe`
 - **模板**: 模板图片必须保持原始像素尺寸，禁止缩放
 - **紧急停止**: 鼠标移到屏幕四角可停止（`pyautogui.FAILSAFE = True`）
-- **暂停**: `Ctrl+.` 切换暂停/恢复
+- **暂停**: `Ctrl+.` 切换暂停/恢复；暂停下按 `Q` 安全退出（仅终端前台有效）
 
 ## 架构要点
 - 主循环无限运行，`try/except BaseException` 包裹，异常后 5s 自动继续
-- 每轮: 截图(90×153) → ORB BFMatcher(crossCheck, Hamming<50) → 最佳模板决策 → OCR 分数检测 → 自摸/跳过
+- 每轮: 截图(90×153) → ORB BFMatcher(crossCheck, Hamming<50) → 最佳模板决策 → OCR 分数检测（未识别到重试 0.1s） → 自摸/跳过
 - 忽略 `mahjong_auto_ORB_*.py`、`auto_ORB_*.py`、`mouse_tracker.py`（.gitignore 排除的旧文件）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由

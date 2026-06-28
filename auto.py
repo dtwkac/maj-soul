@@ -26,7 +26,7 @@ SKIP_BTN = (500, 950)               # 跳过按钮坐标
 CLICK_DELAY = 0.05   # 点自摸前停顿
 SKIP_DELAY = 0.05    # 点跳过前停顿
 CLICK_TIMES = 73     # 自摸后连点次数（7.3秒）
-LOOP_SLEEP = 1.5     # 主循环每次间隔
+LOOP_SLEEP = 1.3     # 主循环每次间隔
 
 # ===== 模板路径 =====
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
@@ -129,30 +129,32 @@ def _best_match(bgr, debug=True):
 # ===== 分数检测 =====
 
 def _check_number():
-    """OCR 读取分数区域，低于阈值则报警暂停"""
-    img = np.array(pyautogui.screenshot(region=NUM_REGION))
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
-    _, th = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    text = pytesseract.image_to_string(
-        th, config='--psm 7 -c tessedit_char_whitelist=0123456789/'
-    ).strip()
-    m = re.match(r'(\d+)/(\d+)', text)
-    if m:
-        cur = int(m.group(1))
-        score = text
-        if cur < NUM_ALARM:
-            winsound.Beep(880, 300)
-            time.sleep(0.2)
-            winsound.Beep(880, 300)
-            time.sleep(0.2)
-            winsound.Beep(880, 600)
-            ctypes.windll.user32.MessageBoxW(
-                0, f"分数 {cur}，低于 {NUM_ALARM}!", "报警", 0
-            )
-    else:
-        score = '---'
-    return score
+    """OCR 读取分数区域，低于阈值则报警；动画期间不断重试直到识别到数字"""
+    while True:
+        img = np.array(pyautogui.screenshot(region=NUM_REGION))
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
+        _, th = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        text = pytesseract.image_to_string(
+            th, config='--psm 7 -c tessedit_char_whitelist=0123456789/'
+        ).strip()
+        m = re.match(r'(\d+)/(\d+)', text)
+        if m:
+            cur = int(m.group(1))
+            score = text
+            if cur < NUM_ALARM:
+                winsound.Beep(880, 300)
+                time.sleep(0.2)
+                winsound.Beep(880, 300)
+                time.sleep(0.2)
+                winsound.Beep(880, 600)
+                ctypes.windll.user32.MessageBoxW(
+                    0, f"分数 {cur}，低于 {NUM_ALARM}!", "报警", 0
+                )
+            return score
+        if paused:
+            return '---'
+        time.sleep(0.1)
 
 # ===== 点击动作 =====
 
