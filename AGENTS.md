@@ -29,7 +29,7 @@ uv run mouse_pos.py        # 坐标捕获工具（右键退出）
 - **Tesseract 路径**: 硬编码为 `D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe`
 - **模板**: 模板图片必须保持原始像素尺寸，禁止缩放
 - **紧急停止**: 鼠标移到屏幕四角可停止（`pyautogui.FAILSAFE = True`）
-- **暂停**: `Ctrl+.` 切换暂停/恢复；暂停下按 `Q` 安全退出（仅终端前台有效）
+- **暂停**: `Ctrl+.` 弹窗暂停；确定继续运行，取消退出程序
 
 ## 架构要点
 - 主循环无限运行，`try/except BaseException` 包裹，异常后 5s 自动继续

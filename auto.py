@@ -46,35 +46,29 @@ CONF_STRICT = {
 # ===== 报警 =====
 
 def _alarm(msg):
-    """响三声警报 + 弹窗"""
+    """响三声警报 + 弹窗（确定=继续，取消=退出）"""
     winsound.Beep(880, 300)
     time.sleep(0.2)
     winsound.Beep(880, 300)
     time.sleep(0.2)
     winsound.Beep(880, 600)
-    ctypes.windll.user32.MessageBoxW(0, msg, "报警", 0)
+    ret = ctypes.windll.user32.MessageBoxW(0, msg, "报警", 1)
+    if ret != 1:
+        os._exit(0)
 
 # ===== 暂停控制 =====
 paused = False
 
-def _toggle_pause():
+def _pause_dialog():
+    """Ctrl+. 暂停 + 弹窗（确定=继续，取消=退出）"""
     global paused
-    paused = not paused
-    if paused:
-        print("\n--- 已暂停 (Ctrl+. 恢复, Q 安全退出) ---\n")
-    else:
-        print("\n--- 已恢复 ---\n")
+    paused = True
+    ret = ctypes.windll.user32.MessageBoxW(0, "已暂停，确定继续运行，取消退出程序", "暂停", 1)
+    paused = False
+    if ret != 1:
+        os._exit(0)
 
-def _safe_exit():
-    if not paused:
-        return
-    keyboard.send('backspace')
-    time.sleep(0.05)
-    print("\n安全退出\n")
-    os._exit(0)
-
-keyboard.add_hotkey('ctrl+.', _toggle_pause)
-keyboard.on_press_key('q', lambda e: _safe_exit())
+keyboard.add_hotkey('ctrl+.', _pause_dialog)
 
 # ===== 模板加载 =====
 
