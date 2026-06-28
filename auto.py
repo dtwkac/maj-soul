@@ -67,7 +67,6 @@ def _load_templates(folder, is_target):
         kp, des = orb.detectAndCompute(img, None)
         cnt = len(kp) if kp is not None else 0
         items.append((f, des, is_target))
-        print(f"  [{('目标' if is_target else '干扰')}] {f} ({cnt} 特征点)")
     return items
 
 templates = _load_templates(TARGET_DIR, True)
@@ -78,9 +77,7 @@ if not templates:
 
 n_target = sum(1 for t in templates if t[2])
 n_dist = len(templates) - n_target
-print(f"共 {len(templates)} 模板 (目标{n_target}, 干扰{n_dist})")
 print(f"目标牌: {', '.join(sorted(TARGET_NAMES))}")
-print("关闭窗口即可停止")
 
 # ===== 截图与匹配 =====
 
@@ -198,7 +195,7 @@ while True:
             _click_skip(info)
 
         time.sleep(LOOP_SLEEP)
-        print("-" * 40)
+        print("-" * 60)
 
     except (SystemExit, KeyboardInterrupt):
         raise
