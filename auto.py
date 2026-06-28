@@ -26,8 +26,8 @@ SKIP_BTN = (500, 950)               # 跳过按钮坐标
 # ===== 按键延迟配置（秒） =====
 CLICK_DELAY = 0.05   # 点自摸前停顿
 SKIP_DELAY = 0.05    # 点跳过前停顿
-CLICK_TIMES = 73     # 自摸后连点次数（7.3秒）
-LOOP_SLEEP = 1.3     # 主循环每次间隔
+CLICK_TIMES = 70     # 自摸后连点次数（7.0秒）
+LOOP_SLEEP = 1.0     # 主循环每次间隔
 
 # ===== 模板路径 =====
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
@@ -96,13 +96,25 @@ def _capture():
     return np.array(pyautogui.screenshot(region=TILE_REGION))
 
 def _best_match(bgr, debug=True):
-    """ORB 特征匹配：对所有模板计算好匹配数，返回 (最佳模板名, 好匹配数, 是否目标)"""
-    gray = cv2.cvtColor(bgr, cv2.COLOR_RGB2GRAY)
+    """ORB 特征匹配：对所有模板计算好匹配数，返回 (最佳模板名, 好匹配数, 是否目标)；无特征点时重试"""
     orb = cv2.ORB_create(nfeatures=500)
-    _, des2 = orb.detectAndCompute(gray, None)
-    if des2 is None:
-        print("[特征] 无特征点")
-        return None, 0, False
+    fail_count = 0
+    while True:
+        gray = cv2.cvtColor(bgr, cv2.COLOR_RGB2GRAY)
+        _, des2 = orb.detectAndCompute(gray, None)
+        if des2 is not None:
+            break
+        if paused:
+            return None, 0, False
+        fail_count += 1
+        print(f"未检测到牌面特征点，第{fail_count}次重试")
+        if fail_count >= 5:
+            fail_count = 0
+            ctypes.windll.user32.MessageBoxW(
+                0, "连续多次无法检测到牌面特征点，请检查游戏窗口", "警告", 0
+            )
+        time.sleep(0.1)
+        bgr = _capture()
 
     best_name, best_cnt, best_is_target = None, 0, False
     scores = []
