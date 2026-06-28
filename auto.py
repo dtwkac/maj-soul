@@ -9,7 +9,6 @@ import winsound
 import keyboard
 import re
 import traceback
-
 pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe'
 pyautogui.FAILSAFE = True
 
@@ -49,9 +48,21 @@ paused = False
 def _toggle_pause():
     global paused
     paused = not paused
-    print(f"\n{'=== 已暂停 (Ctrl+. 恢复) ===' if paused else '=== 已恢复 ==='}\n")
+    if paused:
+        print("\n--- 已暂停 (Ctrl+. 恢复, Q 安全退出) ---\n")
+    else:
+        print("\n--- 已恢复 ---\n")
+
+def _safe_exit():
+    if not paused:
+        return
+    keyboard.send('backspace')
+    time.sleep(0.05)
+    print("\n安全退出\n")
+    os._exit(0)
 
 keyboard.add_hotkey('ctrl+.', _toggle_pause)
+keyboard.on_press_key('q', lambda e: _safe_exit())
 
 # ===== 模板加载 =====
 
@@ -137,7 +148,7 @@ def _check_number():
             time.sleep(0.2)
             winsound.Beep(880, 600)
             ctypes.windll.user32.MessageBoxW(
-                0, f"分数 {cur}，低于 {NUM_ALARM}", "报警", 0
+                0, f"分数 {cur}，低于 {NUM_ALARM}!", "报警", 0
             )
     else:
         score = '---'
