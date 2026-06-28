@@ -150,11 +150,14 @@ def _best_match(bgr, debug=True):
         if paused:
             return None, 0, False
         mismatch += 1
+        p_name, p_cnt, _ = prev or ('无', 0, False)
+        p_label = p_name.replace('.JPG','') if p_name else '无'
+        c_label = best_name.replace('.JPG','') if best_name else '无'
+        print(f"不匹配({mismatch}) 上次:{p_label}({p_cnt}) / 当前:{c_label}({best_cnt})，重试")
         if mismatch >= 10:
             mismatch = 0
             _alarm("牌面结果持续不一致")
         prev = cur
-        print(f"牌面结果不一致({mismatch})，重新截图匹配")
         time.sleep(0.1)
         bgr = _capture()
 
@@ -189,7 +192,7 @@ def _check_number():
             _alarm("分数持续异常")
         if paused:
             return '---'
-        print(f"分数未稳定({text!r})({mismatch})，重试")
+        print(f"分数不匹配({mismatch}) {text!r}，重试")
         time.sleep(0.2)
 
 # ===== 点击动作 =====
