@@ -101,52 +101,63 @@ def _capture():
     return np.array(pyautogui.screenshot(region=TILE_REGION))
 
 def _best_match(bgr, debug=True):
-    """ORB 特征匹配：对所有模板计算好匹配数，返回 (最佳模板名, 好匹配数, 是否目标)；无特征点时重试"""
+    """ORB 特征匹配：连续两次匹配结果相同则返回"""
     orb = cv2.ORB_create(nfeatures=500)
-    fail_count = 0
+    prev = None
     while True:
-        gray = cv2.cvtColor(bgr, cv2.COLOR_RGB2GRAY)
-        _, des2 = orb.detectAndCompute(gray, None)
-        if des2 is not None:
-            break
+        fail_count = 0
+        while True:
+            gray = cv2.cvtColor(bgr, cv2.COLOR_RGB2GRAY)
+            _, des2 = orb.detectAndCompute(gray, None)
+            if des2 is not None:
+                break
+            if paused:
+                return None, 0, False
+            fail_count += 1
+            print(f"未检测到牌面特征点，第{fail_count}次重试")
+            if fail_count >= 30:
+                fail_count = 0
+                _alarm("连续多次无法检测到牌面特征点，请检查游戏窗口")
+            time.sleep(0.2)
+            bgr = _capture()
+
+        best_name, best_cnt, best_is_target = None, 0, False
+        scores = []
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+        for name, des1, is_target in templates:
+            if des1 is None:
+                scores.append((name, 0))
+                continue
+            matches = bf.match(des1, des2)
+            good = sum(1 for m in matches if m.distance < 50)
+            scores.append((name, good))
+            if good > best_cnt:
+                best_cnt = good
+                best_name = name
+                best_is_target = is_target
+
+        if debug:
+            scores.sort(key=lambda x: -x[1])
+            dbg = '  '.join(f"{s[0].replace('.JPG','')}={s[1]}" for s in scores[:6])
+            label = best_name.replace('.JPG','') if best_name else '无'
+            print(f"[特征] {dbg} → 最佳:{label}({best_cnt})")
+
+        cur = (best_name, best_cnt, best_is_target)
+        if prev == cur:
+            return cur
         if paused:
             return None, 0, False
-        fail_count += 1
-        print(f"未检测到牌面特征点，第{fail_count}次重试")
-        if fail_count >= 10:
-            fail_count = 0
-            _alarm("连续多次无法检测到牌面特征点，请检查游戏窗口")
-        time.sleep(0.2)
+        prev = cur
+        print("牌面结果不一致，重新截图匹配")
+        time.sleep(0.1)
         bgr = _capture()
-
-    best_name, best_cnt, best_is_target = None, 0, False
-    scores = []
-    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-
-    for name, des1, is_target in templates:
-        if des1 is None:
-            scores.append((name, 0))
-            continue
-        matches = bf.match(des1, des2)
-        good = sum(1 for m in matches if m.distance < 50)
-        scores.append((name, good))
-        if good > best_cnt:
-            best_cnt = good
-            best_name = name
-            best_is_target = is_target
-
-    if debug:
-        scores.sort(key=lambda x: -x[1])
-        dbg = '  '.join(f"{s[0].replace('.JPG','')}={s[1]}" for s in scores[:6])
-        label = best_name.replace('.JPG','') if best_name else '无'
-        print(f"[特征] {dbg} → 最佳:{label}({best_cnt})")
-    return best_name, best_cnt, best_is_target
 
 # ===== 分数检测 =====
 
 def _check_number():
-    """OCR 读取分数区域，低于阈值则报警；画面未完全更新时不断重试直到读取到 MAX_SCORE"""
-    retry_count = 0
+    """OCR 读取分数区域，连续两次相同则接受；低于阈值则报警"""
+    prev = None
     while True:
         img = np.array(pyautogui.screenshot(region=NUM_REGION))
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -159,28 +170,16 @@ def _check_number():
         if m:
             cur = int(m.group(1))
             total = int(m.group(2))
-            if total != MAX_SCORE:
-                retry_count += 1
-                print(f"分数上限未稳定({total}/{MAX_SCORE})，第{retry_count}次重试")
-                if retry_count >= 10:
-                    retry_count = 0
-                    _alarm(f"分数上限持续异常")
-                if paused:
-                    return '---'
-                time.sleep(0.2)
-                continue
-            retry_count = 0
-            score = text
-            if cur < NUM_ALARM:
-                _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
-            return score
-        retry_count += 1
-        print(f"未检测到分数，第{retry_count}次重试")
-        if retry_count >= 10:
-            retry_count = 0
-            _alarm("持续无法检测到分数，请检查游戏窗口")
+            if prev == (cur, total):
+                if cur < NUM_ALARM:
+                    _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
+                return text
+            prev = (cur, total)
+        else:
+            prev = None
         if paused:
             return '---'
+        print(f"分数未稳定({text!r})，重试")
         time.sleep(0.2)
 
 # ===== 点击动作 =====
