@@ -153,8 +153,8 @@ def _check_number():
 
 # ===== 点击动作 =====
 
-def _click_self(ms, score, name_str, cnt, need):
-    print(f"[{ms:.0f}ms] {name_str.replace('.JPG','')} 匹配={cnt}/{need} → 自摸")
+def _click_self(score, name_str, cnt, need):
+    print(f"{name_str.replace('.JPG','')} 匹配={cnt}/{need} → 自摸")
     pyautogui.moveTo(*SELF_BTN)
     time.sleep(CLICK_DELAY)
     pyautogui.click(*SELF_BTN)
@@ -162,8 +162,8 @@ def _click_self(ms, score, name_str, cnt, need):
         pyautogui.click(*CENTER)
         time.sleep(0.1)
 
-def _click_skip(ms, info):
-    print(f"[{ms:.0f}ms] {info} → 跳过")
+def _click_skip(info):
+    print(f"{info} → 跳过")
     pyautogui.moveTo(*SKIP_BTN)
     time.sleep(SKIP_DELAY)
     pyautogui.click(*SKIP_BTN)
@@ -183,22 +183,22 @@ while True:
             time.sleep(0.3)
 
         pyautogui.moveTo(*CENTER)
-        t0 = time.time()
 
         name, conf, is_target = _best_match(_capture())
-        elapsed = (time.time() - t0) * 1000
 
         key = name.replace('.JPG', '') if name else ''
         need = CONF_STRICT.get(name, CONF_TARGET)
         score = _check_number()
+        print(f"分数: {score}")
 
         if name and is_target and key in TARGET_NAMES and conf >= need:
-            _click_self(elapsed, score, name, conf, need)
+            _click_self(score, name, conf, need)
         else:
             info = f"{name}(匹配={conf})" if name else "无匹配"
-            _click_skip(elapsed, info)
+            _click_skip(info)
 
         time.sleep(LOOP_SLEEP)
+        print("-" * 40)
 
     except (SystemExit, KeyboardInterrupt):
         raise
