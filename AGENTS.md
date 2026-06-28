@@ -13,6 +13,9 @@ uv run mouse_pos.py        # 坐标捕获工具（右键退出）
 # 无测试 / 无 lint / 无 typecheck / 无 CI
 ```
 
+## 提交规则
+- **commit 前先同步 README.md 和 AGENTS.md**，确保代码变更对应的文档（常量值、快捷键、流程图等）已更新
+
 ## 项目结构
 - `auto.py` — 唯一生产入口，所有核心逻辑在此
 - `mouse_pos.py` — 获取屏幕坐标的辅助工具（Tkinter 悬浮窗）
