@@ -14,7 +14,7 @@ pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\te
 pyautogui.FAILSAFE = True
 
 # ===== 分数报警阈值 =====
-NUM_ALARM = 110  # cur < NUM_ALARM 时触发报警暂停
+NUM_ALARM = 105  # cur < NUM_ALARM 时触发报警暂停
 
 # ===== 屏幕坐标配置 =====
 TILE_REGION = (435, 875, 90, 153)   # 牌面截图区域 (left, top, width, height)
@@ -27,7 +27,7 @@ SKIP_BTN = (500, 950)               # 跳过按钮坐标
 CLICK_DELAY = 0.05   # 点自摸前停顿
 SKIP_DELAY = 0.05    # 点跳过前停顿
 CLICK_TIMES = 75     # 自摸后连点次数（7.3秒）
-LOOP_SLEEP = 1.2     # 主循环每次间隔
+LOOP_SLEEP = 1.3     # 主循环每次间隔
 
 # ===== 模板路径 =====
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
@@ -75,8 +75,6 @@ if os.path.isdir(DISTRACTOR_DIR):
 if not templates:
     print("错误: 没有模板图片!"); exit(1)
 
-n_target = sum(1 for t in templates if t[2])
-n_dist = len(templates) - n_target
 print(f"目标牌: {', '.join(sorted(TARGET_NAMES))}")
 
 # ===== 截图与匹配 =====
@@ -91,7 +89,7 @@ def _best_match(bgr, debug=True):
     orb = cv2.ORB_create(nfeatures=500)
     _, des2 = orb.detectAndCompute(gray, None)
     if des2 is None:
-        print("  [特征] 无特征点")
+        print("[特征] 无特征点")
         return None, 0, False
 
     best_name, best_cnt, best_is_target = None, 0, False
@@ -114,7 +112,7 @@ def _best_match(bgr, debug=True):
         scores.sort(key=lambda x: -x[1])
         dbg = '  '.join(f"{s[0].replace('.JPG','')}={s[1]}" for s in scores[:6])
         label = best_name.replace('.JPG','') if best_name else '无'
-        print(f"  [特征] {dbg} → 最佳:{label}({best_cnt})")
+        print(f"[特征] {dbg} → 最佳:{label}({best_cnt})")
     return best_name, best_cnt, best_is_target
 
 # ===== 分数检测 =====
@@ -139,7 +137,7 @@ def _check_number():
             time.sleep(0.2)
             winsound.Beep(880, 600)
             ctypes.windll.user32.MessageBoxW(
-                0, f"分数={cur}，低于 {NUM_ALARM}，程序暂停", "报警", 0
+                0, f"分数 {cur}，低于 {NUM_ALARM}，程序暂停", "报警", 0
             )
             global paused
             paused = True
@@ -150,7 +148,7 @@ def _check_number():
 
 # ===== 点击动作 =====
 
-def _click_self(score, name_str, cnt, need):
+def _click_self(name_str, cnt, need):
     print(f"{name_str.replace('.JPG','')} 匹配={cnt}/{need} → 自摸")
     pyautogui.moveTo(*SELF_BTN)
     time.sleep(CLICK_DELAY)
@@ -170,9 +168,9 @@ def _click_skip(info):
 
 print("10秒后开始，请切换到游戏窗口...")
 for i in range(10, 0, -1):
-    print(f"  {i}...")
+    print(f"\r倒计时 {i}s...  ", end='', flush=True)
     time.sleep(1)
-print("开始!")
+print("\n开始!")
 
 while True:
     try:
@@ -189,7 +187,7 @@ while True:
         print(f"分数: {score}")
 
         if name and is_target and key in TARGET_NAMES and conf >= need:
-            _click_self(score, name, conf, need)
+            _click_self(name, conf, need)
         else:
             info = f"{name}(匹配={conf})" if name else "无匹配"
             _click_skip(info)
