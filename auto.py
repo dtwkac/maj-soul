@@ -150,7 +150,7 @@ def _check_number():
     while True:
         img = np.array(pyautogui.screenshot(region=NUM_REGION))
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
+        gray = cv2.resize(gray, None, fx=4, fy=4, interpolation=cv2.INTER_LINEAR)
         _, th = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         text = pytesseract.image_to_string(
             th, config='--psm 7 -c tessedit_char_whitelist=0123456789/'
