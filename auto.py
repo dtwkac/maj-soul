@@ -101,9 +101,10 @@ def _capture():
     return np.array(pyautogui.screenshot(region=TILE_REGION))
 
 def _best_match(bgr, debug=True):
-    """ORB 特征匹配：连续两次匹配结果相同则返回"""
+    """ORB 特征匹配：连续两次匹配结果相同则返回；10次不一致则报警"""
     orb = cv2.ORB_create(nfeatures=500)
     prev = None
+    mismatch = 0
     while True:
         fail_count = 0
         while True:
@@ -148,16 +149,21 @@ def _best_match(bgr, debug=True):
             return cur
         if paused:
             return None, 0, False
+        mismatch += 1
+        if mismatch >= 10:
+            mismatch = 0
+            _alarm("牌面结果持续不一致")
         prev = cur
-        print("牌面结果不一致，重新截图匹配")
+        print(f"牌面结果不一致({mismatch})，重新截图匹配")
         time.sleep(0.1)
         bgr = _capture()
 
 # ===== 分数检测 =====
 
 def _check_number():
-    """OCR 读取分数区域，连续两次相同则接受；低于阈值则报警"""
+    """OCR 读取分数区域，连续两次相同则接受；10次不一致则报警"""
     prev = None
+    mismatch = 0
     while True:
         img = np.array(pyautogui.screenshot(region=NUM_REGION))
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -177,9 +183,13 @@ def _check_number():
             prev = (cur, total)
         else:
             prev = None
+        mismatch += 1
+        if mismatch >= 10:
+            mismatch = 0
+            _alarm("分数持续异常")
         if paused:
             return '---'
-        print(f"分数未稳定({text!r})，重试")
+        print(f"分数未稳定({text!r})({mismatch})，重试")
         time.sleep(0.2)
 
 # ===== 点击动作 =====
