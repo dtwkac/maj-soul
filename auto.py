@@ -13,8 +13,7 @@ pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\te
 pyautogui.FAILSAFE = True
 
 # ===== 分数报警阈值 =====
-NUM_ALARM = 105   # cur < NUM_ALARM 时触发报警暂停
-MAX_SCORE = 184   # 分数上限，画面未完全更新时检测不到此值则继续重试
+NUM_ALARM = 105   # 报警阈值，低于该值时报警
 
 # ===== 屏幕坐标配置 =====
 TILE_REGION = (435, 875, 90, 153)   # 牌面截图区域 (left, top, width, height)
@@ -24,8 +23,10 @@ SELF_BTN = (1200, 820)              # 自摸按钮坐标
 SKIP_BTN = (500, 950)               # 跳过按钮坐标
 
 # ===== 循环配置 =====
-CLICK_TIMES = 70     # 自摸后连点次数（7.0秒）
-LOOP_SLEEP = 1     # 主循环每次间隔
+CLICK_TIMES = 70      # 自摸后连点次数（7.0秒）
+LOOP_SLEEP = 1.2      # 主循环每次间隔
+RETRY_LIMIT = 10      # 检测重试/不匹配次数上限
+SLEEP_INTERVAL = 0.2  # 检测/重试刷新间隔（秒）
 
 # ===== 模板路径 =====
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
@@ -46,9 +47,9 @@ CONF_STRICT = {
 def _alarm(msg):
     """响三声警报 + 弹窗（确定=继续，取消=退出）"""
     winsound.Beep(880, 300)
-    time.sleep(0.2)
+    time.sleep(SLEEP_INTERVAL)
     winsound.Beep(880, 300)
-    time.sleep(0.2)
+    time.sleep(SLEEP_INTERVAL)
     winsound.Beep(880, 600)
     ret = ctypes.windll.user32.MessageBoxW(0, msg, "报警", 1)
     if ret != 1:
@@ -61,7 +62,7 @@ def _pause_dialog():
     """Ctrl+. 暂停 + 弹窗（确定=继续，取消=退出）"""
     global paused
     paused = True
-    ret = ctypes.windll.user32.MessageBoxW(0, "已暂停，确定继续运行，取消退出程序", "暂停", 1)
+    ret = ctypes.windll.user32.MessageBoxW(0, "已暂停，点击确定继续运行，取消退出程序", "暂停", 1)
     paused = False
     if ret != 1:
         os._exit(0)
@@ -99,7 +100,7 @@ def _capture():
     return np.array(pyautogui.screenshot(region=TILE_REGION))
 
 def _best_match(bgr, debug=True):
-    """ORB 特征匹配：连续两次匹配结果相同则返回；10次不一致则报警"""
+    """ORB 特征匹配：连续两次匹配结果相同则返回；RETRY_LIMIT次不一致则报警"""
     orb = cv2.ORB_create(nfeatures=500)
     prev = None
     mismatch = 0
@@ -114,10 +115,10 @@ def _best_match(bgr, debug=True):
                 return None, 0, False
             fail_count += 1
             print(f"未检测到牌面特征点，第{fail_count}次重试")
-            if fail_count >= 30:
+            if fail_count >= RETRY_LIMIT:
                 fail_count = 0
-                _alarm("连续多次无法检测到牌面特征点，请检查游戏窗口")
-            time.sleep(0.2)
+                _alarm("多次无法检测到牌面特征点，请检查游戏窗口")
+            time.sleep(SLEEP_INTERVAL)
             bgr = _capture()
 
         best_name, best_cnt, best_is_target = None, 0, False
@@ -152,17 +153,17 @@ def _best_match(bgr, debug=True):
         p_label = p_name.replace('.JPG','') if p_name else '无'
         c_label = best_name.replace('.JPG','') if best_name else '无'
         print(f"牌面不匹配({mismatch}) 上次:{p_label}({p_cnt}) / 当前:{c_label}({best_cnt})，重试")
-        if mismatch >= 10:
+        if mismatch >= RETRY_LIMIT:
             mismatch = 0
             _alarm("牌面结果持续不一致")
         prev = cur
-        time.sleep(0.2)
+        time.sleep(SLEEP_INTERVAL)
         bgr = _capture()
 
 # ===== 分数检测 =====
 
-def _check_number():
-    """OCR 读取分数区域，连续两次相同则接受；10次不一致则报警"""
+def _check_number(prev_score=None):
+    """OCR 读取分数区域；分数大幅下降时连续两次相同才接受，否则直接返回"""
     prev = None
     mismatch = 0
     while True:
@@ -178,22 +179,31 @@ def _check_number():
         if m:
             cur = int(m.group(1))
             total = int(m.group(2))
+
+            # 分数未大幅下降 → 直接接受
+            if prev_score is None or cur >= prev_score - 8:
+                if cur < NUM_ALARM:
+                    _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
+                return text
+
+            # 分数大幅下降 → 等待稳定
             if prev == (cur, total):
                 if cur < NUM_ALARM:
                     _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
                 return text
             prev = (cur, total)
+            print(f"分数变化异常({prev_score}→{cur})，等待稳定")
         else:
             prev = None
         mismatch += 1
         p = f"{old[0]}/{old[1]}" if old else "无"
         print(f"分数不匹配({mismatch}) 上次:{p} 当前:{text}，重试")
-        if mismatch >= 10:
+        if mismatch >= RETRY_LIMIT:
             mismatch = 0
             _alarm("分数持续异常")
         if paused:
             return '---'
-        time.sleep(0.2)
+        time.sleep(SLEEP_INTERVAL)
 
 # ===== 点击动作 =====
 
@@ -215,11 +225,12 @@ def _click_skip(info):
 
 ctypes.windll.user32.MessageBoxW(0, "请切换到游戏窗口，点击确认后开始运行", "准备就绪", 0)
 print("开始!")
+last_score = None
 
 while True:
     try:
         while paused:
-            time.sleep(0.3)
+            time.sleep(SLEEP_INTERVAL)
 
         pyautogui.moveTo(*CENTER)
 
@@ -227,10 +238,14 @@ while True:
 
         key = name.replace('.JPG', '') if name else ''
         need = CONF_STRICT.get(name, CONF_TARGET)
-        score = _check_number()
+        score = _check_number(last_score)
         print(f"分数: {score}")
         if paused:
             continue
+        if score != '---':
+            m = re.match(r'(\d+)/(\d+)', score)
+            if m:
+                last_score = int(m.group(1))
 
         if name and is_target and key in TARGET_NAMES and conf >= need:
             _click_self(name, conf, need)
