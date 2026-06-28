@@ -137,11 +137,8 @@ def _check_number():
             time.sleep(0.2)
             winsound.Beep(880, 600)
             ctypes.windll.user32.MessageBoxW(
-                0, f"分数 {cur}，低于 {NUM_ALARM}，程序暂停", "报警", 0
+                0, f"分数 {cur}，低于 {NUM_ALARM}", "报警", 0
             )
-            global paused
-            paused = True
-            print(f"\n=== 分数 {cur} 低于 {NUM_ALARM}，已暂停 (Ctrl+. 恢复) ===\n")
     else:
         score = '---'
     return score
