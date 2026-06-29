@@ -1,7 +1,7 @@
 [project]
 name = "maj-soul"
 version = "0.1.0"
-description = "Add your description here"
+description = "雀魂青云之志S4自动刷分脚本"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
