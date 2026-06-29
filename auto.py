@@ -144,8 +144,15 @@ def _best_match(bgr, debug=True):
             print(f"[特征] {dbg} → 最佳:{label}({best_cnt})")
 
         cur = (best_name, best_cnt, best_is_target)
+
+        # 上次无结果，本次有内容 → 直接接受
+        if prev is None and best_name is not None:
+            return cur
+
+        # 连续两次相同 → 接受
         if prev == cur:
             return cur
+
         if paused:
             return None, 0, False
         mismatch += 1
@@ -223,7 +230,7 @@ def _click_skip(info):
 
 # ===== 主循环 =====
 
-ctypes.windll.user32.MessageBoxW(0, "请切换到游戏窗口，点击确认后开始运行", "准备就绪", 0)
+ctypes.windll.user32.MessageBoxW(0, "请切换到游戏窗口，点击确定后开始运行", "准备就绪", 0)
 print("开始!")
 last_score = None
 
