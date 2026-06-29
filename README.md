@@ -2,6 +2,8 @@
 
 1920×1080 分辨率下自动识别牌面、匹配目标牌、点击自摸/跳过的 Python 脚本。
 
+适用的完整卡片阵容参见 [`pics/card_lineup.png`](pics/card_lineup.png)。
+
 ## 原理
 
 1. **截图** — 每轮循环截取牌面区域（90×153）和分数区域（110×30）
@@ -44,7 +46,6 @@ uv run python main.py
 
 ```
 pics/
-├── card_lineup.png   # 完整卡片阵容参考图
 ├── targets/          # 目标牌模板（触发自摸）
 │   ├── 1m.JPG
 │   ├── 1p.JPG
@@ -59,8 +60,6 @@ tools/
 ├── mouse_pos.py       # 坐标捕获工具
 └── threshold_test.py  # 阈值检测测试工具
 ```
-
-`card_lineup.png` 是完整卡片阵容参考图，展示了脚本适用的全部目标牌与干扰牌布局。
 
 模板为游戏内手动截图（原始像素尺寸，无缩放），ORB 在加载时自动提取特征点。
 
