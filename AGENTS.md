@@ -33,6 +33,6 @@ uv run mouse_pos.py        # 坐标捕获工具（右键退出）
 
 ## 架构要点
 - 主循环无限运行，`try/except BaseException` 包裹，异常后 5s 自动继续
-- 每轮: 截图(90×153) → ORB BFMatcher(crossCheck, Hamming<50, 无特征点重试) → 最佳模板决策(连续两次一致) → OCR 分数检测（分数大幅下降时连续两次一致即接受） → 自摸/跳过
+- 每轮: 截图(90×153) → ORB BFMatcher(crossCheck, Hamming<50, 无特征点重试) → 最佳模板决策(首次有结果即接受，否则连续两次一致) → OCR 分数检测（分数大幅下降时连续两次一致即接受） → 自摸/跳过
 - 忽略 `mahjong_auto_ORB_*.py`、`auto_ORB_*.py`、`mouse_tracker.py`（.gitignore 排除的旧文件）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由

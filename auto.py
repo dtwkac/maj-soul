@@ -217,7 +217,7 @@ def _check_number(prev_score=None):
 # ===== 点击动作 =====
 
 def _click_self(name_str, cnt, need):
-    print(f"{name_str.replace('.JPG','')} 匹配={cnt}/{need} → 自摸")
+    print(f"{name_str.replace('.JPG','')} 匹配度{cnt} > 阈值{need} → 自摸")
     pyautogui.moveTo(*SELF_BTN)
     pyautogui.click(*SELF_BTN)
     for _ in range(CLICK_TIMES):
@@ -259,7 +259,12 @@ while True:
         if name and is_target and key in TARGET_NAMES and conf >= need:
             _click_self(name, conf, need)
         else:
-            info = f"{name}(匹配={conf})" if name else "无匹配"
+            if name and is_target and key in TARGET_NAMES:
+                info = f"{name.replace('.JPG','')} 匹配度{conf} < 阈值{need}"
+            elif name:
+                info = f"{name.replace('.JPG','')} 非目标牌"
+            else:
+                info = "无匹配"
             _click_skip(info)
 
         time.sleep(LOOP_SLEEP)
