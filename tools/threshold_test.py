@@ -11,8 +11,6 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
-pyautogui.FAILSAFE = True
-
 # ===== 牌面截图区域（与 main.py 一致） =====
 TILE_REGION = (435, 875, 90, 153)
 

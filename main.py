@@ -10,8 +10,6 @@ import keyboard
 import re
 import traceback
 pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe'
-pyautogui.FAILSAFE = True
-
 # ===== 分数报警阈值 =====
 NUM_ALARM = 105
 

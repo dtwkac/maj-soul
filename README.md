@@ -32,14 +32,13 @@ https://github.com/UB-Mannheim/tesseract/releases
 uv run python main.py
 ```
 
-运行后弹出确认窗口，切换到游戏窗口后点击确认即可开始。**鼠标移到屏幕四角可紧急停止**（pyautogui fail-safe）。
+运行后弹出确认窗口，切换到游戏窗口后点击确认即可开始。
 
 ### 控制
 
 | 按键 | 功能 |
 |------|------|
 | `Ctrl+.` | 暂停（弹窗确定继续 / 取消退出） |
-| 鼠标移到四角 | 紧急停止（pyautogui.FAILSAFE） |
 | 关闭控制台窗口 | 停止程序 |
 
 ## 模板配置

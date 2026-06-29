@@ -29,7 +29,7 @@ uv run python tools/threshold_test.py   # 阈值检测测试工具
 - **分辨率**: 仅支持 1920×1080 全屏，坐标硬编码
 - **Tesseract 路径**: 硬编码为 `D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe`
 - **模板**: 模板图片必须保持原始像素尺寸，禁止缩放
-- **紧急停止**: 鼠标移到屏幕四角可停止（`pyautogui.FAILSAFE = True`）
+- **停止**: 关闭控制台窗口可停止程序
 - **暂停**: `Ctrl+.` 弹窗暂停；确定继续运行，取消退出程序
 
 ## 架构要点
