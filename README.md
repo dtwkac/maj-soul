@@ -2,7 +2,7 @@
 
 1920×1080 分辨率下自动识别牌面、匹配目标牌、点击自摸/跳过的 Python 脚本。
 
-适用的完整卡片阵容参见 [`pics/card_lineup.png`](pics/card_lineup.png)。
+![完整卡片阵容](pics/card_lineup.png)
 
 ## 原理
 
