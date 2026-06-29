@@ -44,20 +44,23 @@ uv run python main.py
 
 ```
 pics/
-├── targets/       # 目标牌模板（触发自摸）
+├── card_lineup.png   # 完整卡片阵容参考图
+├── targets/          # 目标牌模板（触发自摸）
 │   ├── 1m.JPG
 │   ├── 1p.JPG
 │   ├── 9m.JPG
 │   ├── 9p.JPG
 │   ├── 9s.JPG
 │   └── dong.JPG
-└── distractors/   # 干扰牌模板（触发跳过）
+└── distractors/      # 干扰牌模板（触发跳过）
     ├── 7p.JPG
     └── 7s.JPG
 tools/
 ├── mouse_pos.py       # 坐标捕获工具
 └── threshold_test.py  # 阈值检测测试工具
 ```
+
+`card_lineup.png` 是完整卡片阵容参考图，展示了脚本适用的全部目标牌与干扰牌布局。
 
 模板为游戏内手动截图（原始像素尺寸，无缩放），ORB 在加载时自动提取特征点。
 
