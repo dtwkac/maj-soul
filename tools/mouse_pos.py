@@ -1,3 +1,9 @@
+"""
+鼠标坐标捕获工具
+实时显示鼠标在屏幕上的坐标位置，悬浮窗跟随鼠标移动。
+右键点击窗口退出程序。
+"""
+
 import tkinter as tk
 import pyautogui
 
@@ -5,7 +11,6 @@ class MouseTracker:
     def __init__(self):
         self.root = tk.Tk()
         
-        # --- 窗体美化设置 ---
         self.root.title("坐标")
         self.root.attributes("-topmost", True)     # 永远置顶
         self.root.attributes("-alpha", 0.85)       # 半透明效果 (0.0 ~ 1.0)

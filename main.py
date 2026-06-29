@@ -19,7 +19,7 @@ NUM_ALARM = 105
 TILE_REGION = (435, 875, 90, 153)
 NUM_REGION = (365, 805, 125, 30)
 CENTER = (960, 540)
-SELF_BTN = (1200, 820)
+TSUMO_BTN = (1200, 820)
 SKIP_BTN = (500, 950)
 
 # ===== 循环配置 =====
@@ -174,10 +174,10 @@ def _check_number(prev_score=None):
 
 # ===== 点击动作 =====
 
-def _click_self(name_str, cnt, need):
+def _click_tsumo(name_str, cnt, need):
     print(f"{name_str.replace('.JPG','')} 匹配度{cnt} > 阈值{need} → 自摸")
-    pyautogui.moveTo(*SELF_BTN)
-    pyautogui.click(*SELF_BTN)
+    pyautogui.moveTo(*TSUMO_BTN)
+    pyautogui.click(*TSUMO_BTN)
     for _ in range(CLICK_TIMES):
         pyautogui.click(*CENTER)
         time.sleep(0.1)
@@ -218,7 +218,7 @@ def main():
                     last_score = int(m.group(1))
 
             if name and is_target and key in TARGET_NAMES and conf >= need:
-                _click_self(name, conf, need)
+                _click_tsumo(name, conf, need)
             else:
                 if name and is_target and key in TARGET_NAMES:
                     info = f"{name.replace('.JPG','')} 匹配度{conf} < 阈值{need}"
