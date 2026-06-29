@@ -193,11 +193,13 @@ def _check_number(prev_score=None):
                     _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
                 return text
 
-            # 分数大幅下降 → 等待稳定
+            # 连续两次相同 → 稳定，接受
             if prev == (cur, total):
                 if cur < NUM_ALARM:
                     _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
                 return text
+
+            # 分数大幅下降 → 等待下次确认
             prev = (cur, total)
             print(f"分数变化异常({prev_score}→{cur})，等待稳定")
         else:
