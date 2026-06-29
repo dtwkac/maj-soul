@@ -98,8 +98,8 @@ def _best_match(bgr, debug=True):
         fail_count += 1
         print(f"未检测到牌面特征点，第{fail_count}次重试")
         if fail_count >= RETRY_LIMIT:
-            fail_count = 0
-            _alarm("多次无法检测到牌面特征点，请检查游戏窗口")
+            print("多次无法检测到牌面特征点，跳过")
+            return None, 0, False
         time.sleep(SLEEP_INTERVAL)
         bgr = _capture()
 
