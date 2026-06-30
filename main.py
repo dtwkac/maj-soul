@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import mss
 import pyautogui
 import os
 import time
@@ -34,6 +35,14 @@ TARGET_NAMES = {'1m', '9m', '9s', '1p', '9p', 'dong'}
 # ===== 特征匹配阈值 =====
 THRESHOLD_DEFAULT = 10
 
+_SCT = mss.MSS()
+_ORB = cv2.ORB_create(nfeatures=500)
+_BF = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+_COMBINED = {"left": 365, "top": 805, "width": 160, "height": 223}
+
+def _grab_combined():
+    return np.asarray(_SCT.grab(_COMBINED))
+
 # ===== 报警 =====
 
 def _alarm(msg):
@@ -63,14 +72,13 @@ def _pause_dialog():
 
 def _load_templates(folder, is_target):
     items = []
-    orb = cv2.ORB_create(nfeatures=500)
     for f in os.listdir(folder):
         if not f.upper().endswith(('.JPG', '.JPEG', '.PNG')):
             continue
         img = cv2.imread(os.path.join(folder, f), cv2.IMREAD_GRAYSCALE)
         if img is None:
             continue
-        kp, des = orb.detectAndCompute(img, None)
+        kp, des = _ORB.detectAndCompute(img, None)
         items.append((f, des, is_target))
     return items
 
@@ -85,14 +93,14 @@ print(f"目标牌: {', '.join(sorted(TARGET_NAMES))}")
 # ===== 截图与匹配 =====
 
 def _capture():
-    return np.array(pyautogui.screenshot(region=TILE_REGION))
+    combined = _grab_combined()
+    return combined[70:223, 70:160]
 
 def _best_match(bgr, debug=True):
-    orb = cv2.ORB_create(nfeatures=500)
     fail_count = 0
     while True:
-        gray = cv2.cvtColor(bgr, cv2.COLOR_RGB2GRAY)
-        _, des2 = orb.detectAndCompute(gray, None)
+        gray = cv2.cvtColor(bgr, cv2.COLOR_BGRA2GRAY)
+        _, des2 = _ORB.detectAndCompute(gray, None)
         if des2 is not None:
             break
         if paused:
@@ -107,13 +115,12 @@ def _best_match(bgr, debug=True):
 
     best_name, best_cnt, best_is_target = None, 0, False
     scores = []
-    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
     for name, des1, is_target in templates:
         if des1 is None:
             scores.append((name, 0))
             continue
-        matches = bf.match(des1, des2)
+        matches = _BF.match(des1, des2)
         good = sum(1 for m in matches if m.distance < 50)
         scores.append((name, good))
         if good > best_cnt:
@@ -131,12 +138,16 @@ def _best_match(bgr, debug=True):
 
 # ===== 分数检测 =====
 
-def _check_number(prev_score=None):
+def _check_number(prev_score=None, num_cap=None):
     prev = None
     mismatch = 0
     while True:
-        img = np.array(pyautogui.screenshot(region=NUM_REGION))
-        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        if num_cap is not None:
+            gray = cv2.cvtColor(num_cap, cv2.COLOR_BGRA2GRAY)
+            num_cap = None
+        else:
+            combined = _grab_combined()
+            gray = cv2.cvtColor(combined[0:30, 0:125], cv2.COLOR_BGRA2GRAY)
         gray = cv2.resize(gray, None, fx=4, fy=4, interpolation=cv2.INTER_LINEAR)
         _, th = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         text = pytesseract.image_to_string(
@@ -207,7 +218,9 @@ def main():
 
             pyautogui.moveTo(*CENTER)
 
-            cap = _capture()
+            combined = _grab_combined()
+            cap = combined[70:223, 70:160]
+            num_cap = combined[0:30, 0:125]
             if prev_cap is not None and np.array_equal(cap, prev_cap):
                 same_count += 1
             else:
@@ -222,7 +235,7 @@ def main():
 
             key = name.replace('.JPG', '') if name else ''
             need = THRESHOLD_DEFAULT
-            score = _check_number(last_score)
+            score = _check_number(last_score, num_cap)
             print(f"分数: {score}")
             if paused:
                 continue

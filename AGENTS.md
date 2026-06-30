@@ -3,7 +3,7 @@
 ## 技术栈
 - **语言/运行环境**: Python ≥3.14（`.python-version` / `pyproject.toml`）
 - **包管理器**: `uv`（`uv.lock` 锁定）
-- **平台**: Windows only（`winsound`、`ctypes`、`keyboard`）
+- **平台**: Windows only（`winsound`、`ctypes`、`keyboard`、`mss`）
 
 ## 关键命令
 ```bash
@@ -34,7 +34,8 @@ uv run python tools/threshold_test.py   # 阈值检测测试工具
 
 ## 架构要点
 - 主循环无限运行，`try/except BaseException` 包裹，异常后 5s 自动继续
-- 每轮: 截图(90×153) → 卡住检测（与上轮截图比较，连续5次相同报警） → ORB BFMatcher(crossCheck, Hamming<50, 无特征点重试) → 最佳模板决策 → OCR 分数检测（分数大幅下降时连续两次一致即接受） → 自摸/跳过
+- 每轮: 合并截屏(mss, 160×223) → 视图切片取牌面/分数 ROI → 卡住检测（与上轮截图比较，连续5次相同报警） → ORB BFMatcher(crossCheck, Hamming<50, 无特征点重试) → 最佳模板决策 → OCR 分数检测（分数大幅下降时连续两次一致即接受） → 自摸/跳过
+- ORB 检测器与 BFMatcher 在模块级缓存（`_ORB` / `_BF`），每圈不重复构造
 - `_alarm`: 5 × Beep(660Hz, 200ms) + PlaySound("SystemExclamation")，消息框确定继续/取消退出
 - 忽略 `mahjong_auto_ORB_*.py`、`auto_ORB_*.py`、`mouse_tracker.py`（.gitignore 排除的旧文件）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
