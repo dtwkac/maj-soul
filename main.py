@@ -37,11 +37,13 @@ THRESHOLD_DEFAULT = 10
 # ===== 报警 =====
 
 def _alarm(msg):
-    winsound.Beep(880, 300)
-    time.sleep(SLEEP_INTERVAL)
-    winsound.Beep(880, 300)
-    time.sleep(SLEEP_INTERVAL)
-    winsound.Beep(880, 600)
+    winsound.Beep(660, 200)
+    winsound.Beep(660, 200)
+    winsound.Beep(660, 200)
+    winsound.Beep(660, 200)
+    winsound.Beep(660, 200)
+    time.sleep(0.3)
+    winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
     ret = ctypes.windll.user32.MessageBoxW(0, msg, "报警", 1)
     if ret != 1:
         os._exit(0)
@@ -195,6 +197,9 @@ def main():
     print("开始!")
     last_score = None
 
+    prev_cap = None
+    same_count = 0
+
     while True:
         try:
             while paused:
@@ -202,7 +207,18 @@ def main():
 
             pyautogui.moveTo(*CENTER)
 
-            name, conf, is_target = _best_match(_capture())
+            cap = _capture()
+            if prev_cap is not None and np.array_equal(cap, prev_cap):
+                same_count += 1
+            else:
+                same_count = 0
+            prev_cap = cap
+
+            if same_count >= 4:
+                same_count = 0
+                _alarm("画面连续5次结果一致，可能卡住")
+
+            name, conf, is_target = _best_match(cap)
 
             key = name.replace('.JPG', '') if name else ''
             need = THRESHOLD_DEFAULT
