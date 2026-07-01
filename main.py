@@ -42,6 +42,11 @@ _ORB = cv2.ORB_create(nfeatures=200)
 _BF = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 _COMBINED = {"left": 365, "top": 805, "width": 175, "height": 223}
 
+_DEBUG = '--debug' in sys.argv
+if _DEBUG:
+    os.makedirs('temp', exist_ok=True)
+_DEBUG_SAVED_SCORES = set()
+
 def _grab_combined():
     return np.asarray(_SCT.grab(_COMBINED))
 
@@ -118,7 +123,7 @@ def _best_match(bgr):
         if good > 50:
             break
 
-    if '--debug' in sys.argv:
+    if _DEBUG:
         scores.sort(key=lambda x: -x[1])
         dbg = '  '.join(f"{s[0].replace('.png', '')}={s[1]}" for s in scores[:6])
         label = best_name.replace('.png', '') if best_name else '无'
@@ -133,11 +138,13 @@ def _check_number(prev_score=None, num_cap=None):
     mismatch = 0
     while True:
         if num_cap is not None:
+            raw = num_cap.copy()
             gray = cv2.cvtColor(num_cap, cv2.COLOR_BGRA2GRAY)
             num_cap = None
         else:
             combined = _grab_combined()
-            gray = cv2.cvtColor(combined[0:30, 0:125], cv2.COLOR_BGRA2GRAY)
+            raw = combined[0:30, 0:125].copy()
+            gray = cv2.cvtColor(raw, cv2.COLOR_BGRA2GRAY)
         text = pytesseract.image_to_string(
             gray, config='--psm 7 -c tessedit_char_whitelist=0123456789/'
         ).strip()
@@ -146,6 +153,12 @@ def _check_number(prev_score=None, num_cap=None):
         if m:
             cur = int(m.group(1))
             total = int(m.group(2))
+
+            if _DEBUG:
+                fn = m.group(1)
+                if fn not in _DEBUG_SAVED_SCORES:
+                    cv2.imwrite(f"temp/{fn}.png", raw[..., :3])
+                    _SAVED_SCORES.add(fn)
 
             if prev_score is None or cur >= prev_score - 8 or prev == (cur, total):
                 if cur < NUM_ALARM:
@@ -190,9 +203,7 @@ def main():
     ctypes.windll.user32.MessageBoxW(0, "请切换到游戏窗口，点击确定后开始运行", "准备就绪", 0)
     print("开始!")
 
-    debug = '--debug' in sys.argv
-
-    if debug:
+    if _DEBUG:
         root = tk.Tk()
         root.title("雀魂检测")
         root.attributes('-topmost', True)
@@ -266,13 +277,13 @@ def main():
                 m = re.match(r'(\d+)/(\d+)', score)
                 if m:
                     last_score = int(m.group(1))
-            if debug:
+            if _DEBUG:
                 _lbl_score.configure(text=f"分数: {score}")
 
             if name and is_target and key in TARGET_NAMES and conf >= need:
                 if paused:
                     continue
-                if debug:
+                if _DEBUG:
                     _lbl_action.configure(text=f"自摸  {key} ({conf}/{need})", fg='#006600')
                     root.update()
                 _click_tsumo(key, conf, need)
@@ -283,7 +294,7 @@ def main():
                     info = f"{key} 非目标牌"
                 else:
                     info = "无匹配"
-                if debug:
+                if _DEBUG:
                     if name:
                         _lbl_action.configure(text=f"跳过  {key}", fg='#cc6600')
                     else:
