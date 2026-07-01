@@ -8,7 +8,8 @@
 ## 关键命令
 ```bash
 uv sync                    # 安装依赖
-uv run python main.py      # 运行主脚本
+uv run python main.py      # 静默运行（无 GUI 窗口）
+uv run python main.py --debug  # 显示调试信息窗口
 uv run python tools/mouse_pos.py        # 坐标捕获工具（右键退出）
 uv run python tools/threshold_test.py   # 阈值检测测试工具
 # 无测试 / 无 lint / 无 typecheck / 无 CI
@@ -33,9 +34,12 @@ uv run python tools/threshold_test.py   # 阈值检测测试工具
 - **暂停**: `Ctrl+.` 弹窗暂停；确定继续运行，取消退出程序
 
 ## 架构要点
-- 主循环无限运行，`try/except BaseException` 包裹，异常后 5s 自动继续
-- 每轮: 合并截屏(mss, 160×223) → 视图切片取牌面/分数 ROI → 卡住检测（与上轮截图比较，连续5次相同报警） → ORB BFMatcher(crossCheck, Hamming<50, 无特征点重试) → 最佳模板决策 → OCR 分数检测（分数大幅下降时连续两次一致即接受） → 自摸/跳过
-- ORB 检测器与 BFMatcher 在模块级缓存（`_ORB` / `_BF`），每圈不重复构造
+- 主循环无限运行，`try/except BaseException` 包裹，异常后打印堆栈并 `os._exit(1)` 安全退出
+- 每轮: 合并截屏(mss, 175×223) → 视图切片取牌面/分数 ROI → 卡住检测（与上轮截图比较，连续5次相同报警） → ORB BFMatcher(crossCheck, Hamming<50, good>50时break) → OCR 分数检测（每轮统一调用，分数大幅下降时连续两次一致即接受） → 自摸/跳过
+- ORB nfeatures=200，检测器与 BFMatcher 在模块级缓存（`_ORB` / `_BF`），每圈不重复构造
+- OCR 灰度图直出 Tesseract（无二值化/放大），PSM 7 + whitelist 0123456789/
 - `_alarm`: 5 × Beep(660Hz, 200ms) + PlaySound("SystemExclamation")，消息框确定继续/取消退出
-- 忽略 `mahjong_auto_ORB_*.py`、`auto_ORB_*.py`、`mouse_tracker.py`（.gitignore 排除的旧文件）
+- 无匹配/无特征点直接跳过，不做重试
+- `--debug` 可选：开启 Tkinter 调试窗口（右下角固定 550,770，260×150，Consolas 16 bold）
+- `Tesseract-OCR/`（已在 .gitignore）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
