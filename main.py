@@ -5,7 +5,6 @@ import numpy as np
 import re
 import traceback
 import os
-import sys
 import pyautogui
 
 import ui
