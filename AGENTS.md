@@ -39,7 +39,7 @@ uv run python tools/threshold_test.py   # 阈值检测测试工具
 - ORB nfeatures=200，检测器与 BFMatcher 在模块级缓存（`_ORB` / `_BF`），每圈不重复构造
 - OCR 灰度图直出 Tesseract（无二值化/放大），PSM 7 + whitelist 0123456789/
 - `_alarm`: 5 × Beep(660Hz, 200ms) + PlaySound("SystemExclamation")，消息框确定继续/取消退出
-- 无匹配/无特征点时等待 0.2s 重试一次（重截屏+重新匹配），仍无匹配才跳过
+- 无匹配时等待 0.2s 重试一次（重截屏+重新匹配），仍无匹配才跳过
 - `--debug` 可选：开启 Tkinter 调试窗口（右下角固定 550,770，260×150，Consolas 16 bold）
 - `Tesseract-OCR/`（已在 .gitignore）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
