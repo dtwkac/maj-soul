@@ -172,4 +172,4 @@ OCR 灰度图直出 Tesseract（PSM 7），无二值化/放大预处理。
 - 干扰模板（distractors/）中任意图片被判定为最佳时会强制跳过
 - 截屏用 `mss` 替代 `pyautogui.screenshot`：只捕获指定区域（不截全屏），直接返回 ndarray，延迟降至 ~5-15ms
 - 牌面与分数区域合并为一次 `mss.grab`（`left=365, top=805, width=175, height=223`），numpy 视图切片取出两个 ROI，API 调用减半
-- 无匹配/无特征点直接跳过，不重试
+- 无匹配/无特征点时等待 0.2s 重试一次（重截屏+重新匹配），仍无匹配才跳过

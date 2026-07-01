@@ -250,6 +250,13 @@ def main():
 
             name, conf, is_target = _best_match(cap)
 
+            if name is None:
+                time.sleep(SLEEP_INTERVAL)
+                combined = _grab_combined()
+                cap = combined[80:220, 85:175]
+                num_cap = combined[0:30, 0:125]
+                name, conf, is_target = _best_match(cap)
+
             key = name.replace('.png', '') if name else ''
             need = THRESHOLD_DEFAULT
 
