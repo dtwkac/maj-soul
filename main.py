@@ -24,7 +24,7 @@ SKIP_BTN = (500, 950)
 # ===== 循环配置 =====
 CLICK_TIMES = 70
 LOOP_SLEEP = 1.2
-RETRY_LIMIT = 10
+RETRY_LIMIT = 5
 SLEEP_INTERVAL = 0.2
 
 # ===== 模板路径 =====
