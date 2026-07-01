@@ -15,7 +15,7 @@ pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\te
 NUM_ALARM = 105
 
 # ===== 屏幕坐标配置 =====
-TILE_REGION = (435, 875, 90, 153)
+TILE_REGION = (450, 885, 90, 140)
 NUM_REGION = (365, 805, 125, 30)
 CENTER = (960, 540)
 TSUMO_BTN = (1200, 820)
@@ -30,15 +30,15 @@ SLEEP_INTERVAL = 0.2
 # ===== 模板路径 =====
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
 DISTRACTOR_DIR = r'D:\workspace\maj-soul\pics\distractors'
-TARGET_NAMES = {'1m', '9m', '9s', '1p', '9p', 'dong'}
+TARGET_NAMES = {os.path.splitext(f)[0] for f in os.listdir(TARGET_DIR) if f.upper().endswith('.PNG')}
 
 # ===== 特征匹配阈值 =====
-THRESHOLD_DEFAULT = 10
+THRESHOLD_DEFAULT = 20
 
 _SCT = mss.MSS()
 _ORB = cv2.ORB_create(nfeatures=500)
 _BF = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-_COMBINED = {"left": 365, "top": 805, "width": 160, "height": 223}
+_COMBINED = {"left": 365, "top": 805, "width": 175, "height": 223}
 
 def _grab_combined():
     return np.asarray(_SCT.grab(_COMBINED))
@@ -73,7 +73,7 @@ def _pause_dialog():
 def _load_templates(folder, is_target):
     items = []
     for f in os.listdir(folder):
-        if not f.upper().endswith(('.JPG', '.JPEG', '.PNG')):
+        if not f.upper().endswith('.PNG'):
             continue
         img = cv2.imread(os.path.join(folder, f), cv2.IMREAD_GRAYSCALE)
         if img is None:
@@ -94,24 +94,14 @@ print(f"目标牌: {', '.join(sorted(TARGET_NAMES))}")
 
 def _capture():
     combined = _grab_combined()
-    return combined[70:223, 70:160]
+    return combined[80:220, 85:175]
 
 def _best_match(bgr, debug=True):
-    fail_count = 0
-    while True:
-        gray = cv2.cvtColor(bgr, cv2.COLOR_BGRA2GRAY)
-        _, des2 = _ORB.detectAndCompute(gray, None)
-        if des2 is not None:
-            break
-        if paused:
-            return None, 0, False
-        fail_count += 1
-        print(f"未检测到牌面特征点，第{fail_count}次重试")
-        if fail_count >= RETRY_LIMIT:
-            print("多次无法检测到牌面特征点，跳过")
-            return None, 0, False
-        time.sleep(SLEEP_INTERVAL)
-        bgr = _capture()
+    gray = cv2.cvtColor(bgr, cv2.COLOR_BGRA2GRAY)
+    _, des2 = _ORB.detectAndCompute(gray, None)
+    if des2 is None:
+        print("未检测到牌面特征点")
+        return None, 0, False
 
     best_name, best_cnt, best_is_target = None, 0, False
     scores = []
@@ -130,8 +120,8 @@ def _best_match(bgr, debug=True):
 
     if debug:
         scores.sort(key=lambda x: -x[1])
-        dbg = '  '.join(f"{s[0].replace('.JPG','')}={s[1]}" for s in scores[:6])
-        label = best_name.replace('.JPG','') if best_name else '无'
+        dbg = '  '.join(f"{s[0].replace('.png', '')}={s[1]}" for s in scores[:6])
+        label = best_name.replace('.png', '') if best_name else '无'
         print(f"[特征] {dbg} → 最佳:{label}({best_cnt})")
 
     return best_name, best_cnt, best_is_target
@@ -186,7 +176,7 @@ def _check_number(prev_score=None, num_cap=None):
 # ===== 点击动作 =====
 
 def _click_tsumo(name_str, cnt, need):
-    print(f"{name_str.replace('.JPG','')} 匹配度{cnt} > 阈值{need} → 自摸")
+    print(f"{name_str.replace('.png', '')} 匹配度{cnt} > 阈值{need} → 自摸")
     pyautogui.moveTo(*TSUMO_BTN)
     pyautogui.click(*TSUMO_BTN)
     for _ in range(CLICK_TIMES):
@@ -210,6 +200,7 @@ def main():
 
     prev_cap = None
     same_count = 0
+    no_match_count = 0
 
     while True:
         try:
@@ -219,7 +210,7 @@ def main():
             pyautogui.moveTo(*CENTER)
 
             combined = _grab_combined()
-            cap = combined[70:223, 70:160]
+            cap = combined[80:220, 85:175]
             num_cap = combined[0:30, 0:125]
             if prev_cap is not None and np.array_equal(cap, prev_cap):
                 same_count += 1
@@ -233,7 +224,18 @@ def main():
 
             name, conf, is_target = _best_match(cap)
 
-            key = name.replace('.JPG', '') if name else ''
+            if not name:
+                no_match_count += 1
+                if no_match_count >= RETRY_LIMIT:
+                    no_match_count = 0
+                else:
+                    print(f"无匹配({no_match_count}/{RETRY_LIMIT})，继续检测")
+                    time.sleep(SLEEP_INTERVAL)
+                    continue
+            else:
+                no_match_count = 0
+
+            key = name.replace('.png', '') if name else ''
             need = THRESHOLD_DEFAULT
             score = _check_number(last_score, num_cap)
             print(f"分数: {score}")
@@ -248,9 +250,9 @@ def main():
                 _click_tsumo(name, conf, need)
             else:
                 if name and is_target and key in TARGET_NAMES:
-                    info = f"{name.replace('.JPG','')} 匹配度{conf} < 阈值{need}"
+                    info = f"{name.replace('.png', '')} 匹配度{conf} < 阈值{need}"
                 elif name:
-                    info = f"{name.replace('.JPG','')} 非目标牌"
+                    info = f"{name.replace('.png', '')} 非目标牌"
                 else:
                     info = "无匹配"
                 _click_skip(info)
