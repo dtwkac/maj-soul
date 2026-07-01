@@ -50,6 +50,13 @@ uv run python main.py --debug   # 带 Tkinter 调试窗口
 ### 目录结构
 
 ```
+consts.py              # 全部常量（坐标、阈值、路径、DEBUG 标志）
+capture.py             # 截屏（mss，合并 175×223 区域）
+tile_matcher.py        # 牌型匹配（ORB 特征 + BFMatcher，模板加载）
+score_reader.py        # 分数检测（Tesseract OCR，含 debug 截图）
+clicker.py             # 点击动作（自摸/跳过）
+ui.py                  # 用户交互（报警、暂停弹窗、debug 窗口）
+main.py                # 入口，主循环
 pics/
 ├── targets/          # 目标牌模板（触发自摸）
 │   ├── 1m.png
@@ -167,7 +174,7 @@ OCR 灰度图直出 Tesseract（PSM 7），无二值化/放大预处理。
 
 - 不要缩放模板图像，保持原始像素尺寸（手动截图时的尺寸）
 - ORB nfeatures=200，好匹配距离上限 50，good>50 时提前退出循环
-- 检测器与 BFMatcher 在模块级缓存复用（`_ORB` / `_BF`）
+- 检测器与 BFMatcher 在模块级缓存复用（`tile_matcher._ORB` / `tile_matcher._BF`）
 - 使用 `cv2.NORM_HAMMING` + `crossCheck=True` 的 BFMatcher
 - 干扰模板（distractors/）中任意图片被判定为最佳时会强制跳过
 - 截屏用 `mss` 替代 `pyautogui.screenshot`：只捕获指定区域（不截全屏），直接返回 ndarray，延迟降至 ~5-15ms
