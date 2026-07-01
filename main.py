@@ -118,10 +118,11 @@ def _best_match(bgr):
         if good > 50:
             break
 
-    scores.sort(key=lambda x: -x[1])
-    dbg = '  '.join(f"{s[0].replace('.png', '')}={s[1]}" for s in scores[:6])
-    label = best_name.replace('.png', '') if best_name else '无'
-    print(f"[特征] {dbg} → 最佳:{label}({best_cnt})")
+    if '--debug' in sys.argv:
+        scores.sort(key=lambda x: -x[1])
+        dbg = '  '.join(f"{s[0].replace('.png', '')}={s[1]}" for s in scores[:6])
+        label = best_name.replace('.png', '') if best_name else '无'
+        print(f"[特征] {dbg} → 最佳:{label}({best_cnt})")
 
     return best_name, best_cnt, best_is_target
 
@@ -146,12 +147,7 @@ def _check_number(prev_score=None, num_cap=None):
             cur = int(m.group(1))
             total = int(m.group(2))
 
-            if prev_score is None or cur >= prev_score - 8:
-                if cur < NUM_ALARM:
-                    _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
-                return text
-
-            if prev == (cur, total):
+            if prev_score is None or cur >= prev_score - 8 or prev == (cur, total):
                 if cur < NUM_ALARM:
                     _alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
                 return text
@@ -228,7 +224,6 @@ def main():
         root.geometry(f"+{new_x}+{new_y}")
 
     last_score = None
-    _last_score_str = "---"
 
     prev_cap = None
     same_count = 1
@@ -261,7 +256,6 @@ def main():
             score = _check_number(last_score, num_cap)
             print(f"分数: {score}")
             if score != '---':
-                _last_score_str = score
                 m = re.match(r'(\d+)/(\d+)', score)
                 if m:
                     last_score = int(m.group(1))
