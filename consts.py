@@ -15,7 +15,7 @@ TSUMO_BTN = (1200, 820)
 SKIP_BTN = (500, 950)
 
 CLICK_TIMES = 72
-LOOP_SLEEP = 1.2
+LOOP_SLEEP = 1.0
 SLEEP_INTERVAL = 0.2
 RETRY_LIMIT = 5
 
@@ -23,5 +23,8 @@ TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
 DISTRACTOR_DIR = r'D:\workspace\maj-soul\pics\distractors'
 
 THRESHOLD_DEFAULT = 20
+
+PRECONDITION_TEMPLATE = r'D:\workspace\maj-soul\pics\precondition.png'
+PRECONDITION_THRESHOLD = 0.8
 
 TARGET_NAMES = {os.path.splitext(f)[0] for f in os.listdir(TARGET_DIR) if f.upper().endswith('.PNG')}

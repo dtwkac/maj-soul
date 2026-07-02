@@ -1,6 +1,6 @@
 import cv2
 import os
-from consts import DEBUG, TARGET_DIR, DISTRACTOR_DIR
+from consts import DEBUG, TARGET_DIR, DISTRACTOR_DIR, PRECONDITION_TEMPLATE
 
 _ORB = cv2.ORB_create(nfeatures=200)
 _BF = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
@@ -24,6 +24,15 @@ if not templates:
     print("错误: 没有模板图片!"); exit(1)
 
 print(f"目标牌: {', '.join(sorted({os.path.splitext(f)[0] for f in os.listdir(TARGET_DIR) if f.upper().endswith('.PNG')}))}")
+
+_precond = cv2.imread(PRECONDITION_TEMPLATE, cv2.IMREAD_GRAYSCALE) if os.path.isfile(PRECONDITION_TEMPLATE) else None
+
+def check_precondition(bgra_region):
+    if _precond is None:
+        return 0.0
+    gray = cv2.cvtColor(bgra_region, cv2.COLOR_BGRA2GRAY)
+    result = cv2.matchTemplate(gray, _precond, cv2.TM_CCOEFF_NORMED)
+    return float(cv2.minMaxLoc(result)[1])
 
 def best_match(bgr):
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGRA2GRAY)

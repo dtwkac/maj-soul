@@ -41,7 +41,7 @@ def check_number(prev_score=None, num_cap=None):
                     cv2.imwrite(f"temp/{fn}.png", raw[..., :3])
                     _DEBUG_SAVED_SCORES.add(fn)
 
-            # 接受条件：首次检测 / 分数未大幅下降 / 高分连续两次一致
+            # 接受条件：首次检测 / 分数未大幅下降 / 高分连续两次一致（都是第一张自摸）
             # 低分（<NUM_ALARM）即使连续一致也不直接接受，走下面 retry 计数
             if prev_score is None or cur >= prev_score - 8 or (prev == (cur, total) and cur >= NUM_ALARM):
                 if cur < NUM_ALARM:
@@ -60,5 +60,9 @@ def check_number(prev_score=None, num_cap=None):
             mismatch = 0
             ui.alarm("分数持续异常")
         if ui.paused:
+            if m:
+                return text
+            if old is not None:
+                return f"{old[0]}/{old[1]}"
             return '---'
         time.sleep(SLEEP_INTERVAL)
