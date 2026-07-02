@@ -55,10 +55,11 @@ def main():
                 same_count = 0
                 cancelled = threading.Event()
                 def _auto_close():
-                    if not cancelled.wait(60):
+                    if not cancelled.wait(300):
                         pyautogui.moveTo(1890, 27)
+                        time.sleep(1)
                         pyautogui.click(1890, 27)
-                        print("卡住检测超时(60s)，自动关闭游戏窗口")
+                        print("卡住检测超时(5min)，自动关闭游戏窗口")
                         os._exit(0)
                 threading.Thread(target=_auto_close, daemon=True).start()
                 ui.alarm("画面连续5次结果一致，可能卡住")
