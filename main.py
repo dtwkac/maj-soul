@@ -45,21 +45,22 @@ def main():
             # ===== 卡住检测（始终运行，先于先决条件）=====
             if prev_cap is not None and np.array_equal(cap, prev_cap):
                 same_count += 1
-                if DEBUG and same_count >= 2:
+                if DEBUG:
                     print(f"卡住检测: 连续 {same_count} 次相同")
             else:
                 same_count = 1
             prev_cap = cap
 
             # 悬停在跳过按钮
-            if same_count >= 3:
-                print(f"卡住检测: 连续 {same_count} 次相同，悬停跳过按钮重新截图比对")
+            if same_count >= 5:
+                print(f"连续 {same_count} 次相同，悬停跳过按钮重新截图比对")
                 pyautogui.moveTo(*SKIP_BTN)
-                time.sleep(SLEEP_INTERVAL)
+                time.sleep(1)
                 combined = grab_combined()
                 cap = combined[80:220, 85:175]
                 if np.array_equal(cap, prev_cap):
-                    print("卡住确认: 重截图与上一帧仍相同，触发报警")
+                    if DEBUG:
+                        print("卡住确认: 悬停处重新截图与上一帧仍相同，触发报警")
                     ui.alarm("画面连续多次结果一致，可能卡住")
                 prev_cap = cap
 
