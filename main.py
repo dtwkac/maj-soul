@@ -20,6 +20,8 @@ def main():
     ret = ctypes.windll.user32.MessageBoxW(0, "请切换到游戏窗口，点击确定后开始运行", "准备就绪", 1)
     if ret != 1:
         os._exit(0)
+    start_time = time.time()
+    ui.START_TIME = start_time
     print("开始!")
 
     if DEBUG:
