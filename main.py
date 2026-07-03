@@ -91,7 +91,12 @@ def main():
             else:
                 last_score = None
 
-            if last_score is not None and last_score < NUM_ALARM:
+            # OCR 未读到分数，本轮跳过
+            if last_score is None:
+                print("分数: 未识别，跳过本轮")
+                continue
+
+            if last_score < NUM_ALARM:
                 ui.alarm(f"分数 {last_score}，低于 {NUM_ALARM}!")
                 continue
             if DEBUG:
