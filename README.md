@@ -39,7 +39,7 @@ uv run python main.py           # 静默运行（无信息窗口）
 uv run python main.py --debug   # 带 Tkinter 调试窗口
 ```
 
-运行后弹出确认窗口，切换到游戏窗口后点击确认即可开始。
+运行后弹出确认窗口，点击"确定"开始运行，"取消"则安全退出。
 
 ### 控制
 
@@ -76,7 +76,7 @@ tools/
 └── threshold_test.py  # 阈值检测测试工具
 ```
 
-模板为游戏内手动截图（原始像素尺寸，无缩放），ORB 在加载时自动提取特征点。
+模板保持原始像素尺寸，ORB 在加载时自动提取特征点。
 
 ### 目标牌
 
@@ -185,15 +185,31 @@ OCR 灰度图 3 倍放大后直出 Tesseract（PSM 7），分数大幅下降时�
 
 ## 开发备注
 
-- 不要缩放模板图像，保持原始像素尺寸（手动截图时的尺寸）
-- ORB nfeatures=200，好匹配距离上限 50
-- 检测器与 BFMatcher 在模块级缓存复用（`tile_matcher._ORB` / `tile_matcher._BF`）
-- 使用 `cv2.NORM_HAMMING` + `crossCheck=True` 的 BFMatcher
-- 干扰模板（distractors/）中任意图片被判定为最佳时会强制跳过
-- 截屏用 `mss` 替代 `pyautogui.screenshot`：只捕获指定区域（不截全屏），直接返回 ndarray，延迟降至 ~5-15ms
-- 牌面与分数区域合并为一次 `mss.grab`（`left=365, top=805, width=175, height=223`），numpy 视图切片取出两个 ROI，API 调用减半
-- 先决条件使用 `cv2.matchTemplate(TM_CCOEFF_NORMED)`，模板不存在时返回 0.0（不通过）
-- 重试只由先决条件控制：不满足则跳过本轮；牌面识别不再有无匹配重试，一次出结果
-- 低分即使连续一致也需累计异常计数达到 `RETRY_LIMIT(5)` 才报警，中途恢复则正常接受
-- 卡住检测移至先决条件之前，确保始终运行
-- precondition.png 放在 `pics/` 而非 `pics/targets/`，避免被误识别为目标牌
+### 图像采集
+- 截屏基于 `mss` 而非 `pyautogui.screenshot`：仅捕获指定区域（避免全屏截取），直接返回 ndarray，延迟约 5–15ms
+- 牌面区域与分数区域合并为一次 `mss.grab` 调用（`left=365, top=805, width=175, height=223`），通过 numpy 视图切片分离两个 ROI，减少 API 调用次数
+
+### 特征匹配
+- 检测器 `_ORB`（nfeatures=200）与匹配器 `_BF`（`cv2.NORM_HAMMING`，`crossCheck=True`）在模块级初始化并缓存复用，避免每轮重复构造
+- BFMatcher 对模板描述子与画面描述子执行交叉匹配，Hamming 距离 < 50 计为有效匹配；若有效匹配数 > 50 则提前终止当前模板的匹配
+- 匹配结果为所有模板中有效匹配数最大值对应的模板；过程无重试，单次出结果
+
+### 先决条件检测
+- 基于 `cv2.matchTemplate(TM_CCOEFF_NORMED)` 对 `pics/precondition.png` 进行模板匹配
+- 返回归一化相关系数（[0, 1]），低于 `PRECONDITION_THRESHOLD(0.8)` 时跳过本轮循环
+- 模板文件不存在时返回 0.0，恒不通过；该机制是唯一的循环重试控制入口
+
+### OCR 分数识别
+- 分数 ROI 灰度化后经 3 倍双三次插值放大，传入 Tesseract（PSM 7，字符白名单 `0123456789/`）
+- 输出格式为 `abc/184`，首次识别或分数未大幅下降（`cur >= prev - 8`）时直接接受
+- 分数大幅下降时等待连续两次一致且不低于 `NUM_ALARM(105)` 才接受；低于 105 时触发报警，需累计异常计数达到 `RETRY_LIMIT(5)` 方弹出报警框，中途恢复则计数清零
+
+### 卡住检测
+- 每轮对牌面 ROI 进行像素级比较（`np.array_equal`），连续 5 次相同判定为画面卡住
+- 卡住检测位于先决条件检测之前，确保始终运行不受先决条件控制流影响
+- 触发后发出声光报警，同时启动 5 分钟超时线程：超时后自动关闭游戏窗口并退出
+
+### 模板目录
+- `pics/targets/` — 目标牌模板（触发自摸）
+- `pics/distractors/` — 干扰牌模板（触发跳过，最佳匹配为该类时强制跳过）
+- `pics/precondition.png` — 先决条件模板（独立存放，避免被误识别为目标牌）

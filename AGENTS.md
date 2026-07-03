@@ -41,6 +41,7 @@ uv run python tools/threshold_test.py   # 阈值检测测试工具
 - **暂停**: `Ctrl+.` 弹窗暂停；确定继续运行，取消退出程序
 
 ## 架构要点
+- 启动弹窗（确定/取消），取消时 `os._exit(0)` 安全退出
 - 主循环无限运行，`try/except BaseException` 包裹，异常后打印堆栈并 `os._exit(1)` 安全退出
 - 每轮: 合并截屏(capture, 175×223) → 视图切片取牌面/分数 ROI → 卡住检测（与上轮截图比较，连续5次相同报警；DEBUG 时从第2次起打印重复次数） → 先决条件检测(tile_matcher.check_precondition, TM_CCOEFF_NORMED，不满足时重试） → ORB BFMatcher(best_match, 无重试一次出结果） → OCR 分数检测(score_reader.check_number） → 自摸/跳过
 - ORB nfeatures=200，检测器与 BFMatcher 在模块级缓存（`tile_matcher._ORB` / `tile_matcher._BF`），每圈不重复构造
