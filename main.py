@@ -28,6 +28,7 @@ def main():
     last_score = None
     prev_cap = None
     same_count = 1
+    stuck_clicked = False  # 连续3次相同后是否已尝试跳过
 
     while True:
         try:
@@ -49,11 +50,17 @@ def main():
                     print(f"卡住检测: 连续 {same_count} 次相同")
             else:
                 same_count = 1
+                stuck_clicked = False  # 画面变化，重置跳过标记
             prev_cap = cap
 
-            if same_count >= 5:
-                same_count = 0
-                ui.alarm("画面连续5次结果一致，可能卡住")
+            # 连续3次相同：先尝试跳过，仍相同再报警
+            if same_count >= 3:
+                if not stuck_clicked:
+                    stuck_clicked = True
+                    click_skip("卡住，尝试跳过")
+                    continue
+                else:
+                    ui.alarm("画面连续多次结果一致，可能卡住")
 
             # ===== 先决条件检测（控制重试，不满足时不进入牌面/分数检测）=====
             precond_score = check_precondition(combined[80:100, 110:145])
