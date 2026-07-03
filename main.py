@@ -89,10 +89,6 @@ def main():
                 if m:
                     last_score = int(m.group(1))
             else:
-                last_score = None
-
-            # OCR 未读到分数，本轮跳过
-            if last_score is None:
                 print("分数: 未识别，跳过本轮")
                 continue
 
