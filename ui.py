@@ -5,7 +5,7 @@ import os
 import threading
 import tkinter as tk
 import pyautogui
-from consts import DEBUG, SLEEP_INTERVAL, ALARM_TIMEOUT
+from consts import CENTER, ALARM_TIMEOUT
 
 paused = False
 START_TIME = None
@@ -13,19 +13,18 @@ START_TIME = None
 def alarm(msg):
     if START_TIME is not None:
         elapsed = time.time() - START_TIME
-        print(f"[{int(elapsed // 3600):02d}:{int((elapsed % 3600) // 60):02d}:{int(elapsed % 60):02d}] 报警: {msg}")
+        print(f"[已运行 {int(elapsed // 3600):02d}:{int((elapsed % 3600) // 60):02d}:{int(elapsed % 60):02d}] 报警: {msg}")
 
     cancelled = threading.Event()
     def _auto_close():
         if not cancelled.wait(ALARM_TIMEOUT):
             if START_TIME is not None:
                 elapsed = time.time() - START_TIME
-                print(f"[{int(elapsed // 3600):02d}:{int((elapsed % 3600) // 60):02d}:{int(elapsed % 60):02d}] 报警超时({ALARM_TIMEOUT // 60}min)，自动关闭游戏窗口")
+                print(f"[已运行 {int(elapsed // 3600):02d}:{int((elapsed % 3600) // 60):02d}:{int(elapsed % 60):02d}] 报警超时({ALARM_TIMEOUT // 60}min)，自动关闭游戏窗口")
             else:
                 print(f"报警超时({ALARM_TIMEOUT // 60}min)，自动关闭游戏窗口")
-            pyautogui.moveTo(1890, 27)
-            time.sleep(1)
             pyautogui.click(1890, 27)
+            pyautogui.moveTo(*CENTER)
             os._exit(0)
     threading.Thread(target=_auto_close, daemon=True).start()
 
