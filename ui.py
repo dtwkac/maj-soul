@@ -2,12 +2,24 @@ import ctypes
 import winsound
 import time
 import os
+import threading
 import tkinter as tk
-from consts import DEBUG, SLEEP_INTERVAL
+import pyautogui
+from consts import DEBUG, SLEEP_INTERVAL, ALARM_TIMEOUT
 
 paused = False
 
 def alarm(msg):
+    cancelled = threading.Event()
+    def _auto_close():
+        if not cancelled.wait(ALARM_TIMEOUT):
+            pyautogui.moveTo(1890, 27)
+            time.sleep(1)
+            pyautogui.click(1890, 27)
+            print(f"报警超时({ALARM_TIMEOUT // 60}min)，自动关闭游戏窗口")
+            os._exit(0)
+    threading.Thread(target=_auto_close, daemon=True).start()
+
     winsound.Beep(660, 200)
     winsound.Beep(660, 200)
     winsound.Beep(660, 200)
@@ -16,6 +28,7 @@ def alarm(msg):
     time.sleep(0.3)
     winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
     ret = ctypes.windll.user32.MessageBoxW(0, msg, "报警", 1)
+    cancelled.set()
     if ret != 1:
         os._exit(0)
 

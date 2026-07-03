@@ -5,7 +5,6 @@ import numpy as np
 import re
 import traceback
 import os
-import threading
 import pyautogui
 
 import ui
@@ -52,20 +51,9 @@ def main():
                 same_count = 1
             prev_cap = cap
 
-            # 每种牌在麻将中仅有4张，同一局中不可能出现5张相同画面
             if same_count >= 5:
                 same_count = 0
-                cancelled = threading.Event()
-                def _auto_close():
-                    if not cancelled.wait(300):
-                        pyautogui.moveTo(1890, 27)
-                        time.sleep(1)
-                        pyautogui.click(1890, 27)
-                        print("卡住检测超时(5min)，自动关闭游戏窗口")
-                        os._exit(0)
-                threading.Thread(target=_auto_close, daemon=True).start()
                 ui.alarm("画面连续5次结果一致，可能卡住")
-                cancelled.set()
 
             # ===== 先决条件检测（控制重试，不满足时不进入牌面/分数检测）=====
             precond_score = check_precondition(combined[80:100, 110:145])

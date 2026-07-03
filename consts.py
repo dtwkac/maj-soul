@@ -28,3 +28,5 @@ PRECONDITION_TEMPLATE = r'D:\workspace\maj-soul\pics\precondition.png'
 PRECONDITION_THRESHOLD = 0.8
 
 TARGET_NAMES = {os.path.splitext(f)[0] for f in os.listdir(TARGET_DIR) if f.upper().endswith('.PNG')}
+
+ALARM_TIMEOUT = 600
