@@ -8,7 +8,7 @@ import os
 import pyautogui
 
 import ui
-from consts import DEBUG, CENTER, SKIP_BTN, THRESHOLD_DEFAULT, LOOP_SLEEP, SLEEP_INTERVAL, TARGET_NAMES, PRECONDITION_THRESHOLD
+from consts import DEBUG, CENTER, SKIP_BTN, THRESHOLD_DEFAULT, LOOP_SLEEP, SLEEP_INTERVAL, TARGET_NAMES, PRECONDITION_THRESHOLD, NUM_ALARM
 from capture import grab_combined
 from tile_matcher import best_match, check_precondition
 from score_reader import check_number
@@ -88,6 +88,12 @@ def main():
                 m = re.match(r'(\d+)/(\d+)', score)
                 if m:
                     last_score = int(m.group(1))
+            else:
+                last_score = None
+
+            if last_score is not None and last_score < NUM_ALARM:
+                ui.alarm(f"分数 {last_score}，低于 {NUM_ALARM}!")
+                continue
             if DEBUG:
                 lbl_score.configure(text=f"分数: {score}")
 

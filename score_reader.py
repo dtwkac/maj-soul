@@ -44,8 +44,6 @@ def check_number(prev_score=None, num_cap=None):
             # 接受条件：首次检测 / 分数未大幅下降 / 高分连续两次一致（都是第一张自摸）
             # 低分（<NUM_ALARM）即使连续一致也不直接接受，走下面 retry 计数
             if prev_score is None or cur >= prev_score - 8 or (prev == (cur, total) and cur >= NUM_ALARM):
-                if cur < NUM_ALARM:
-                    ui.alarm(f"分数 {cur}，低于 {NUM_ALARM}!")
                 return text
 
             prev = (cur, total)
