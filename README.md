@@ -9,7 +9,7 @@
 ## 原理
 
 1. **截图** — 每轮循环合并截取牌面 + 分数区域（175×223），mss 直接返回 ndarray 后切片取出两个 ROI
-2. **卡住检测** — 每轮比较当前牌面截图与上一轮，连续 3 次相同则鼠标悬停跳过按钮重新截图，仍相同则报警弹窗（先于先决条件，始终运行）
+2. **卡住检测** — 每轮比较当前牌面截图与上一轮，连续 3 次相同则鼠标悬停跳过按钮重新截图，仍相同则触发重连（`relaunch.run`，先于先决条件，始终运行）
 3. **先决条件检测** — `cv2.matchTemplate(TM_CCOEFF_NORMED)` 匹配 `precondition.png`，不满足时跳过本轮（控制重试）
 4. **ORB 特征匹配** — 对牌面 ROI 提取 ORB 特征点；与预设的目标/干扰模板进行 BFMatcher 交叉匹配，取好匹配数（Hamming < 50）最多的模板（无重试，一次出结果）
 5. **决策** — 最佳模板的匹配数 ≥ 阈值(20) 且是目标牌 → 点自摸；否则点跳过
@@ -58,6 +58,7 @@ capture.py             # 截屏（mss，合并 175×223 区域）
 tile_matcher.py        # 牌型匹配（ORB 特征 + BFMatcher，模板加载）
 score_reader.py        # 分数检测（Tesseract OCR，含 debug 截图）
 clicker.py             # 点击动作（自摸/跳过）
+relaunch.py            # 重连模块（卡住时刷新游戏并等待回归）
 ui.py                  # 用户交互（报警、暂停弹窗、debug 窗口）
 main.py                # 入口，主循环
 pics/
@@ -68,9 +69,12 @@ pics/
 │   ├── 9p.png
 │   ├── 9s.png
 │   └── dong.png
-└── distractors/      # 干扰牌模板（触发跳过）
-    ├── 7p.png
-    └── 7s.png
+├── distractors/      # 干扰牌模板（触发跳过）
+│   ├── 7p.png
+│   └── 7s.png
+└── relaunch/         # 重连匹配模板
+    ├── qyzz.png
+    └── continue.png
 tools/
 ├── mouse_pos.py       # 坐标捕获工具
 └── threshold_test.py  # 阈值检测测试工具
@@ -94,6 +98,12 @@ tools/
 | `CENTER` | (960, 540) | 屏幕中心（连点/鼠标复位） |
 | `TSUMO_BTN` | (1200, 820) | 自摸按钮 |
 | `SKIP_BTN` | (500, 950) | 跳过按钮 |
+| `RELAUNCH_BTN` | (165, 80) | 刷新按钮 |
+| `RELAUNCH_QYZZ_REGION` | (1635, 720, 110, 100) | qyzz 检测区域 |
+| `RELAUNCH_QYZZ_CLICK` | (1695, 775) | qyzz 按钮 |
+| `RELAUNCH_CONTINUE_REGION` | (795, 860, 330, 90) | continue 检测区域 |
+| `RELAUNCH_CONTINUE_CLICK` | (870, 900) | continue 按钮 |
+| `RELAUNCH_PRECOND_REGION` | (475, 885, 35, 20) | 重连完成先决条件检测区域 |
 
 ## 阈值说明
 
@@ -105,6 +115,9 @@ tools/
 | `LOOP_SLEEP` | 1.0 | 每轮循环间隔（秒） |
 | `SLEEP_INTERVAL` | 0.2 | 检测/重试刷新间隔（秒） |
 | `PRECONDITION_THRESHOLD` | 0.8 | 先决条件匹配阈值（TM_CCOEFF_NORMED，范围 0~1） |
+| `RELAUNCH_THRESHOLD` | 0.9 | 重连画面匹配阈值 |
+| `RELAUNCH_INTERVAL` | 15 | 重连重试间隔（秒） |
+| `RELAUNCH_DIR` | `pics/relaunch/` | 重连模板目录 |
 
 阈值是 **好匹配数**（BFMatcher 交叉匹配中 Hamming 距离 < 50 的匹配对数）。模板特征总数越多，理论上可达的匹配数越高。
 
@@ -126,7 +139,7 @@ tools/
 │ 合并截屏     │  175×223（mss），切片取牌面 + 分数 ROI
 ├─────────────┤
 │ 卡住检测     │  与上一轮截图比较，连续3次时悬停
-│             │  跳过按钮重截图；仍相同则报警
+│             │  跳过按钮重截图；仍相同则重连
 ├─────────────┤
 │ 先决条件检测 │  TM_CCOEFF_NORMED 匹配
 │             │  不满足 → 跳过本轮（重试）
@@ -167,7 +180,7 @@ OCR 灰度图 3 倍放大后直出 Tesseract（PSM 7），分数大幅下降时�
 
 ## 画面卡住检测
 
-程序每轮对牌面 ROI 进行像素级比较（`np.array_equal`），连续 3 次完全相同时鼠标悬停至跳过按钮处并重新截图比对，仍相同则触发报警。卡住检测位于先决条件检测之前，确保始终运行，不受条件控制流影响。  
+程序每轮对牌面 ROI 进行像素级比较（`np.array_equal`），连续 3 次完全相同时鼠标悬停至跳过按钮处并重新截图比对，仍相同则触发重连（`relaunch.run`）。卡住检测位于先决条件检测之前，确保始终运行，不受条件控制流影响。  
 `--debug` 模式下，从连续第 2 次相同起会打印 `卡住检测: 连续 N 次相同` 日志。
 
 ## 异常处理
@@ -204,9 +217,14 @@ OCR 灰度图 3 倍放大后直出 Tesseract（PSM 7），分数大幅下降时�
 - OCR 未读到分数时返回 `'---'`，主循环跳过本轮；低分（`< NUM_ALARM`）由主循环立即报警
 
 ### 卡住检测
-- 每轮对牌面 ROI 进行像素级比较（`np.array_equal`），连续 3 次相同时悬停跳过按钮重新截图比对，仍相同则触发报警
+- 每轮对牌面 ROI 进行像素级比较（`np.array_equal`），连续 3 次相同时悬停跳过按钮重新截图比对，仍相同则触发重连（`relaunch.run`）
 - 卡住检测位于先决条件检测之前，确保始终运行不受先决条件控制流影响
-- 触发后发出声光报警，同时启动 `ALARM_TIMEOUT` 秒超时线程：超时后自动关闭游戏窗口并退出
+- 重连流程依次尝试匹配刷新按钮、qyzz 画面、continue 画面、先决条件，全通过后继续主循环；任一步骤超限则回调 `ui.alarm` 报警
+
+### 重连模块
+- `relaunch.py` 封装完整重连流程：点击刷新按钮（165, 80）→ 等待 30s → 匹配 qyzz 画面 → 点击 qyzz 按钮 → 匹配 continue 画面 → 点击 continue 按钮 → 匹配先决条件 → 全部成功后继续主循环
+- 每个匹配步骤使用 `cv2.matchTemplate(TM_CCOEFF_NORMED)`，阈值 0.9，重试上限 5 次，间隔 15s
+- 任一步骤超限则回调 `ui.alarm` 报警
 
 ### 模板目录
 - `pics/targets/` — 目标牌模板（触发自摸）

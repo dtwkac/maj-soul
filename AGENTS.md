@@ -24,12 +24,14 @@ uv run python tools/threshold_test.py   # 阈值检测测试工具
 - `tile_matcher.py` — 牌型匹配（ORB 特征 + BFMatcher，模板加载）+ 先决条件检测
 - `score_reader.py` — 分数检测（Tesseract OCR，含 debug 截图）
 - `clicker.py` — 点击动作（自摸/跳过）
+- `relaunch.py` — 重连模块（卡住时刷新游戏并等待回归）
 - `ui.py` — 用户交互（报警、暂停弹窗、debug 窗口）
 - `main.py` — 入口，主循环
 - `tools/mouse_pos.py` — 获取屏幕坐标的辅助工具（Tkinter 悬浮窗）
 - `tools/threshold_test.py` — 阈值检测测试工具（Tkinter GUI）
 - `pics/targets/` — 目标牌模板（触发自摸）
 - `pics/distractors/` — 干扰牌模板（触发跳过）
+- `pics/relaunch/` — 重连匹配模板（qyzz.png, continue.png）
 - `pics/precondition.png` — 先决条件模板（控制重试）
 - `Tesseract-OCR/` — 本地 Tesseract 安装目录（已在 .gitignore）
 
@@ -43,7 +45,8 @@ uv run python tools/threshold_test.py   # 阈值检测测试工具
 ## 架构要点
 - 启动弹窗（确定/取消），取消时 `os._exit(0)` 安全退出
 - 主循环无限运行，`try/except BaseException` 包裹，异常后打印堆栈并 `os._exit(1)` 安全退出
-- 每轮: 合并截屏(capture, 175×223) → 视图切片取牌面/分数 ROI → 卡住检测（与上轮截图比较，连续3次相同则悬停跳过按钮重截图，仍相同则报警；DEBUG 时从第2次起打印重复次数） → 先决条件检测(tile_matcher.check_precondition, TM_CCOEFF_NORMED，不满足时重试） → ORB BFMatcher(best_match, 无重试一次出结果） → OCR 分数检测(score_reader.check_number） → 自摸/跳过
+- 每轮: 合并截屏(capture, 175×223) → 视图切片取牌面/分数 ROI → 卡住检测（与上轮截图比较，连续3次相同则悬停跳过按钮重截图，仍相同则触发重连(relaunch.run)；DEBUG 时从第2次起打印重复次数） → 先决条件检测(tile_matcher.check_precondition, TM_CCOEFF_NORMED，不满足时重试） → ORB BFMatcher(best_match, 无重试一次出结果） → OCR 分数检测(score_reader.check_number） → 自摸/跳过
+- 重连模块 `relaunch.py`：卡住确认后依次点击刷新按钮、匹配 qyzz 画面、匹配 continue 画面、匹配先决条件，全部成功后继续主循环；任一步骤超限则回调 ui.alarm
 - ORB nfeatures=200，检测器与 BFMatcher 在模块级缓存（`tile_matcher._ORB` / `tile_matcher._BF`），每圈不重复构造
 - OCR 灰度图 3 倍放大后直出 Tesseract，PSM 7 + whitelist 0123456789/，分数大幅下降时连续两次一致即接受
 - `ui.alarm`: 5 × Beep(660Hz, 200ms) + PlaySound("SystemExclamation")，消息框确定继续/取消退出；所有报警均含 `ALARM_TIMEOUT` 秒超时自动关闭游戏窗口（1890, 27 停留1s后点击）并退出

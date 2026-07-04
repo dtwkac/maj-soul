@@ -8,6 +8,7 @@ import os
 import pyautogui
 
 import ui
+import relaunch
 from consts import DEBUG, CENTER, SKIP_BTN, THRESHOLD_DEFAULT, LOOP_SLEEP, SLEEP_INTERVAL, TARGET_NAMES, PRECONDITION_THRESHOLD, NUM_ALARM
 from capture import grab_combined
 from tile_matcher import best_match, check_precondition
@@ -61,8 +62,11 @@ def main():
                 cap = combined[80:220, 85:175]
                 if np.array_equal(cap, prev_cap):
                     if DEBUG:
-                        print("卡住确认: 悬停处重新截图与上一帧仍相同，触发报警")
-                    ui.alarm("画面连续多次结果一致，可能卡住")
+                        print("卡住确认: 悬停处重新截图与上一帧仍相同，执行重连")
+                    relaunch.run()
+                    prev_cap = None
+                    same_count = 1
+                    continue
                 prev_cap = cap
 
             # ===== 先决条件检测（控制重试，不满足时不进入牌面/分数检测）=====
