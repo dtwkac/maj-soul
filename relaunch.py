@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import mss
 import pyautogui
+import winsound
 import ui
 from consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_INTERVAL
 from consts import RELAUNCH_DIR, RELAUNCH_BTN, RELAUNCH_QYZZ_REGION, RELAUNCH_QYZZ_CLICK
@@ -13,9 +14,10 @@ _QYZZ = cv2.imread(f'{RELAUNCH_DIR}/qyzz.png', cv2.IMREAD_GRAYSCALE)
 _CONTINUE = cv2.imread(f'{RELAUNCH_DIR}/continue.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND = cv2.imread(PRECONDITION_TEMPLATE, cv2.IMREAD_GRAYSCALE)
 
+_SCT = mss.MSS()
+
 def _match(region, template):
-    with mss.MSS() as sct:
-        img = np.asarray(sct.grab({"left": region[0], "top": region[1], "width": region[2], "height": region[3]}))
+    img = np.asarray(_SCT.grab({"left": region[0], "top": region[1], "width": region[2], "height": region[3]}))
     gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
     res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
     return float(cv2.minMaxLoc(res)[1])
@@ -29,6 +31,10 @@ def _wait(region, template, label, click_pos=None):
                 pyautogui.click(*click_pos)
                 print(f"  {label} 匹配，点击 {click_pos}")
                 time.sleep(5)
+                while _match(region, template) >= RELAUNCH_THRESHOLD:
+                    pyautogui.click(*click_pos)
+                    print(f"  {label} 画面未改变，再次点击 {click_pos}")
+                    time.sleep(5)
             else:
                 print(f"  {label} 匹配")
             return True
@@ -40,6 +46,9 @@ def _wait(region, template, label, click_pos=None):
 
 def run():
     print("触发重连流程")
+    winsound.PlaySound("SystemHand", winsound.SND_ALIAS | winsound.SND_ASYNC)
+    pyautogui.moveTo(*RELAUNCH_BTN)
+    time.sleep(1)
     pyautogui.click(*RELAUNCH_BTN)
     print("已点击刷新，等待 30s...")
     time.sleep(30)

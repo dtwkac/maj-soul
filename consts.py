@@ -6,7 +6,7 @@ pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\te
 
 DEBUG = '--debug' in sys.argv
 
-NUM_ALARM = 105
+NUM_ALARM = 81
 
 TILE_REGION = (450, 885, 90, 140)
 NUM_REGION = (365, 805, 125, 30)
