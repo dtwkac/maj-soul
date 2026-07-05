@@ -25,6 +25,7 @@ def check_number(prev_score=None, num_cap=None):
             combined = grab_combined()
             raw = combined[0:30, 0:125].copy()
             gray = cv2.cvtColor(raw, cv2.COLOR_BGRA2GRAY)
+        gray = cv2.bilateralFilter(gray, 5, 75, 75)
         big = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
         _, big = cv2.threshold(big, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         text = pytesseract.image_to_string(
