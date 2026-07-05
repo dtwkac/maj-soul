@@ -114,7 +114,7 @@ tools/
 | `RETRY_LIMIT` | 5 | OCR 分数异常重试上限 |
 | `LOOP_SLEEP` | 1.0 | 每轮循环间隔（秒） |
 | `SLEEP_INTERVAL` | 0.2 | 检测/重试刷新间隔（秒） |
-| `PRECONDITION_THRESHOLD` | 0.8 | 先决条件匹配阈值（TM_CCOEFF_NORMED，范围 0~1） |
+| `PRECONDITION_THRESHOLD` | 0.9 | 先决条件匹配阈值（TM_CCOEFF_NORMED，范围 0~1） |
 | `RELAUNCH_THRESHOLD` | 0.9 | 重连画面匹配阈值 |
 | `RELAUNCH_INTERVAL` | 15 | 重连重试间隔（秒） |
 | `RELAUNCH_DIR` | `pics/relaunch/` | 重连模板目录 |
@@ -207,7 +207,7 @@ OCR 灰度图 3 倍放大后直出 Tesseract（PSM 7），分数大幅下降时�
 
 ### 先决条件检测
 - 基于 `cv2.matchTemplate(TM_CCOEFF_NORMED)` 对 `pics/precondition.png` 进行模板匹配
-- 返回归一化相关系数（[0, 1]），低于 `PRECONDITION_THRESHOLD(0.8)` 时跳过本轮循环
+- 返回归一化相关系数（[0, 1]），低于 `PRECONDITION_THRESHOLD(0.9)` 时跳过本轮循环
 - 模板文件不存在时返回 0.0，恒不通过；该机制是唯一的循环重试控制入口
 
 ### OCR 分数识别
