@@ -37,10 +37,6 @@ def check_number(prev_score=None, num_cap=None):
             cur = int(m.group(1))
             total = int(m.group(2))
 
-            if cur > total:
-                prev = None
-                print(f"分数异常({cur}>{total})，重试")
-                m = None
             if m:
                 if DEBUG:
                     fn = m.group(1)
@@ -48,13 +44,13 @@ def check_number(prev_score=None, num_cap=None):
                         cv2.imwrite(f"temp/{fn}.png", raw[..., :3])
                         _DEBUG_SAVED_SCORES.add(fn)
 
-                # 接受条件：首次检测 / 分数未大幅下降 / 高分连续两次一致（都是第一张自摸）
+                # 接受条件：首次检测 / 分数未大幅下降 / 高分连续两次一致（都是第一张自摸），且不高于上限
                 # 低分（<NUM_ALARM）即使连续一致也不直接接受，走下面 retry 计数
-                if prev_score is None or cur >= prev_score - 8 or (prev == (cur, total) and cur >= NUM_ALARM):
-                    return text
-
-                prev = (cur, total)
-                print(f"分数变化异常({prev_score}→{cur})，等待稳定")
+                if cur <= total:
+                    if prev_score is None or cur >= prev_score - 8 or (prev == (cur, total) and cur >= NUM_ALARM):
+                        prev = (cur, total)
+                        return text
+                print(f"分数检测异常({prev_score}→{cur})，等待稳定")
         else:
             prev = None
         mismatch += 1
