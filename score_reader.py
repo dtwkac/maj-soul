@@ -14,6 +14,7 @@ if DEBUG:
     os.makedirs('temp')
 
 def check_number(prev_score=None, num_cap=None):
+    # prev: 上一次循环中解析到的有效 (cur, total)，用于"连续两次一致"判断
     prev = None
     mismatch = 0
     while True:
@@ -32,7 +33,10 @@ def check_number(prev_score=None, num_cap=None):
             big, config='--psm 7 -c tessedit_char_whitelist=0123456789/'
         ).strip()
         m = re.match(r'(\d+)/(\d+)', text)
+
+        # old: prev 在本次 OCR 前的快照，仅用于日志（prev 随后可能被改写）
         old = prev
+
         if m:
             cur = int(m.group(1))
             total = int(m.group(2))
@@ -64,6 +68,6 @@ def check_number(prev_score=None, num_cap=None):
             if m:
                 return text
             if old is not None:
-                return f"{old[0]}/{old[1]}"
+                return f"{pair_before[0]}/{pair_before[1]}"
             return '---'
         time.sleep(SLEEP_INTERVAL)
