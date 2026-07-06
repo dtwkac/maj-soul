@@ -46,7 +46,10 @@ def _wait(region, template, label, click_pos=None):
 
 def run():
     print("触发重连流程")
-    winsound.PlaySound("SystemHand", winsound.SND_ALIAS | winsound.SND_ASYNC)
+    for i in range(10):
+        winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+        print(f"警告音 {i+1}/10")
+        time.sleep(1)
     pyautogui.moveTo(*RELAUNCH_BTN)
     time.sleep(1)
     pyautogui.click(*RELAUNCH_BTN)
