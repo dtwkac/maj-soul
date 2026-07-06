@@ -100,14 +100,6 @@ def main():
             key = name.replace('.png', '') if name else ''
             need = THRESHOLD_DEFAULT
 
-            if DEBUG:
-                if name:
-                    color = '#006600' if is_target else '#cc6600'
-                    lbl_action.configure(text=f"{key} ({conf}/{need})", fg=color)
-                else:
-                    lbl_action.configure(text="无匹配", fg='#cc6600')
-                root.update()
-
             # ===== 牌面检测结果一致性判断（降低网络检测开销）=====
             current_detect = (name, is_target)
             if current_detect == last_detect:
@@ -171,7 +163,7 @@ def main():
                     info = "无匹配"
                 if DEBUG:
                     if name:
-                        lbl_action.configure(text=f"跳过  {key}", fg='#cc6600')
+                        lbl_action.configure(text=f"跳过  {key} ({conf}/{need})", fg='#cc6600')
                     else:
                         lbl_action.configure(text=f"跳过  无匹配", fg='#cc6600')
                     root.update()
