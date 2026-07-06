@@ -1,19 +1,25 @@
 import keyboard
 import ctypes
 import time
+import cv2
 import numpy as np
 import re
 import traceback
 import os
 import pyautogui
+import mss
 
 import ui
 import relaunch
 from consts import DEBUG, CENTER, SKIP_BTN, THRESHOLD_DEFAULT, LOOP_SLEEP, SLEEP_INTERVAL, TARGET_NAMES, PRECONDITION_THRESHOLD, NUM_ALARM
+from consts import NET_RESET_REGION, NET_RESET_THRESHOLD
 from capture import grab_combined
 from tile_matcher import best_match, check_precondition
 from score_reader import check_number
 from clicker import click_tsumo, click_skip
+
+_NET_RESET_TEMPLATE = cv2.imread('pics/net_reset.png', cv2.IMREAD_GRAYSCALE)
+_NET_SCT = mss.MSS()
 
 def main():
     keyboard.add_hotkey('ctrl+.', ui.pause_dialog)
@@ -30,6 +36,8 @@ def main():
     last_score = None
     prev_cap = None
     same_count = 1
+    detect_repeat = 1
+    last_detect = (None, None)
 
     while True:
         try:
@@ -85,6 +93,35 @@ def main():
 
             key = name.replace('.png', '') if name else ''
             need = THRESHOLD_DEFAULT
+
+            # ===== 牌面检测结果一致性判断（降低网络检测开销）=====
+            current_detect = (name, is_target)
+            if current_detect == last_detect:
+                detect_repeat += 1
+            else:
+                detect_repeat = 1
+                last_detect = current_detect
+
+            if detect_repeat >= 5:
+                net_cap = np.asarray(_NET_SCT.grab({
+                    "left": NET_RESET_REGION[0],
+                    "top": NET_RESET_REGION[1],
+                    "width": NET_RESET_REGION[2],
+                    "height": NET_RESET_REGION[3]
+                }))
+                net_gray = cv2.cvtColor(net_cap, cv2.COLOR_BGRA2GRAY)
+                net_res = cv2.matchTemplate(net_gray, _NET_RESET_TEMPLATE, cv2.TM_CCOEFF_NORMED)
+                net_score = float(cv2.minMaxLoc(net_res)[1])
+                if net_score >= NET_RESET_THRESHOLD:
+                    print(f"牌面检测 5 次一致，匹配到网络断开画面 (匹配度 {net_score:.3f})，执行重连")
+                    relaunch.run()
+                    prev_cap = None
+                    same_count = 1
+                    detect_repeat = 1
+                    last_detect = (None, None)
+                    continue
+                print("牌面 5 次一致但非网络断开，继续正常流程")
+                detect_repeat = 1
 
             # ===== OCR 分数检测 =====
             score = check_number(last_score, num_cap)
