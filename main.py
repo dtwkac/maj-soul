@@ -31,7 +31,7 @@ def main():
     print("开始!")
 
     if DEBUG:
-        root, lbl_score, lbl_action, lbl_precond = ui.setup_debug_window()
+        root, lbl_score, lbl_action, lbl_precond, lbl_elapsed, lbl_restarts, lbl_last_restart = ui.setup_debug_window()
 
     last_score = None
     prev_cap = None
@@ -60,6 +60,12 @@ def main():
             else:
                 same_count = 1
             prev_cap = cap
+
+            if DEBUG:
+                elapsed = time.time() - ui.START_TIME
+                lbl_elapsed.configure(text=f"已运行: {int(elapsed//3600):02d}:{int((elapsed%3600)//60):02d}:{int(elapsed%60):02d}")
+                lbl_restarts.configure(text=f"重启次数: {relaunch.RESTART_COUNT}")
+                lbl_last_restart.configure(text=f"上次重启: {relaunch.LAST_RESTART or '---'}")
 
             # 悬停在跳过按钮
             if same_count >= 5:
@@ -93,6 +99,14 @@ def main():
 
             key = name.replace('.png', '') if name else ''
             need = THRESHOLD_DEFAULT
+
+            if DEBUG:
+                if name:
+                    color = '#006600' if is_target else '#cc6600'
+                    lbl_action.configure(text=f"{key} ({conf}/{need})", fg=color)
+                else:
+                    lbl_action.configure(text="无匹配", fg='#cc6600')
+                root.update()
 
             # ===== 牌面检测结果一致性判断（降低网络检测开销）=====
             current_detect = (name, is_target)

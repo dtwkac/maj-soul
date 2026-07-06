@@ -60,6 +60,16 @@ def setup_debug_window():
 
     tk.Label(frame, text="检测调试", font=('', 11, 'bold'), bg='#ffffff', fg='#3366cc').pack(anchor=tk.W)
     tk.Frame(frame, height=2, bg='#3366cc').pack(fill=tk.X, pady=(4, 6))
+
+    lbl_elapsed = tk.Label(frame, text="已运行: 00:00:00", font=('Consolas', 14, 'bold'), bg='#ffffff', fg='#555')
+    lbl_elapsed.pack(anchor=tk.W)
+    lbl_restarts = tk.Label(frame, text="重启次数: 0", font=('Consolas', 14, 'bold'), bg='#ffffff', fg='#555')
+    lbl_restarts.pack(anchor=tk.W)
+    lbl_last_restart = tk.Label(frame, text="上次重启: ---", font=('Consolas', 14, 'bold'), bg='#ffffff', fg='#555')
+    lbl_last_restart.pack(anchor=tk.W)
+
+    tk.Frame(frame, height=2, bg='#ddd').pack(fill=tk.X, pady=(4, 6))
+
     lbl_precond = tk.Label(frame, text="先决: ---", font=('Consolas', 16, 'bold'), bg='#ffffff', fg='#333')
     lbl_precond.pack(anchor=tk.W)
     lbl_score = tk.Label(frame, text="分数: ---", font=('Consolas', 16, 'bold'), bg='#ffffff', fg='#333')
@@ -68,7 +78,7 @@ def setup_debug_window():
     lbl_action.pack(anchor=tk.W)
 
     root.update()
-    root.geometry("260x160+0+0")
+    root.geometry("260x280+0+0")
     root.update()
     off_x = frame.winfo_rootx()
     off_y = frame.winfo_rooty()
@@ -76,4 +86,4 @@ def setup_debug_window():
     new_y = 770 - off_y - root.winfo_height()
     root.geometry(f"+{new_x}+{new_y}")
 
-    return root, lbl_score, lbl_action, lbl_precond
+    return root, lbl_score, lbl_action, lbl_precond, lbl_elapsed, lbl_restarts, lbl_last_restart

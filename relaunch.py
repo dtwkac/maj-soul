@@ -15,6 +15,8 @@ _CONTINUE = cv2.imread(f'{RELAUNCH_DIR}/continue.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND = cv2.imread(PRECONDITION_TEMPLATE, cv2.IMREAD_GRAYSCALE)
 
 _SCT = mss.MSS()
+RESTART_COUNT = 0
+LAST_RESTART = None
 
 def _match(region, template):
     img = np.asarray(_SCT.grab({"left": region[0], "top": region[1], "width": region[2], "height": region[3]}))
@@ -45,7 +47,11 @@ def _wait(region, template, label, click_pos=None):
     return False
 
 def run():
-    print("触发重连流程")
+    global RESTART_COUNT, LAST_RESTART
+    t = time.strftime('%H:%M:%S')
+    print(f"[{t}] 触发重连流程")
+    RESTART_COUNT += 1
+    LAST_RESTART = t
     for i in range(10):
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print(f"警告音 {i+1}/10")
