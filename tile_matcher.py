@@ -23,7 +23,8 @@ if os.path.isdir(DISTRACTOR_DIR):
 if not templates:
     print("错误: 没有模板图片!"); exit(1)
 
-print(f"目标牌: {', '.join(sorted({os.path.splitext(f)[0] for f in os.listdir(TARGET_DIR) if f.upper().endswith('.PNG')}))}")
+if DEBUG:
+    print(f"目标牌: {', '.join(sorted({os.path.splitext(f)[0] for f in os.listdir(TARGET_DIR) if f.upper().endswith('.PNG')}))}")
 
 _precond = cv2.imread(PRECONDITION_TEMPLATE, cv2.IMREAD_GRAYSCALE) if os.path.isfile(PRECONDITION_TEMPLATE) else None
 

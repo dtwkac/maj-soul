@@ -57,28 +57,22 @@ def main():
             if prev_cap is not None and np.array_equal(cap, prev_cap):
                 same_count += 1
                 if DEBUG:
-                    print(f"卡住检测: 连续 {same_count} 次相同")
+                    print(f"[{time.strftime('%H:%M:%S')}] 卡住检测: 连续 {same_count} 次相同")
             else:
                 same_count = 1
             prev_cap = cap
 
-            if DEBUG:
-                elapsed = time.time() - ui.START_TIME
-                lbl_elapsed.configure(text=f"已运行: {int(elapsed//3600):02d}:{int((elapsed%3600)//60):02d}:{int(elapsed%60):02d}")
-                lbl_restarts.configure(text=f"重启次数: {relaunch.RESTART_COUNT}")
-                lbl_last_restart.configure(text=f"上次重启: {relaunch.LAST_RESTART or '---'}")
-
             # 悬停在跳过按钮
             if same_count >= 5:
-                print(f"连续 {same_count} 次相同，悬停跳过按钮重新截图比对")
+                if DEBUG:
+                    print(f"[{time.strftime('%H:%M:%S')}] 连续 {same_count} 次相同，悬停跳过按钮重新截图比对")
                 pyautogui.moveTo(*SKIP_BTN)
                 time.sleep(1)
                 combined = grab_combined()
                 cap = combined[TILE_REGION[1] - NUM_REGION[1] : TILE_REGION[1] + TILE_REGION[3] - NUM_REGION[1],
                                TILE_REGION[0] - NUM_REGION[0] : TILE_REGION[0] + TILE_REGION[2] - NUM_REGION[0]]
                 if np.array_equal(cap, prev_cap):
-                    if DEBUG:
-                        print("卡住确认: 悬停处重新截图与上一帧仍相同，执行重连")
+                    print(f"[{time.strftime('%H:%M:%S')}] 卡住确认: 悬停处重新截图与上一帧仍相同，执行重连")
                     relaunch.run()
                     prev_cap = None
                     same_count = 1
@@ -87,11 +81,10 @@ def main():
 
             # ===== 先决条件检测（控制重试，不满足时不进入牌面/分数检测）=====
             precond_score = check_precondition(combined[80:100, 110:145])
-            if DEBUG:
-                lbl_precond.configure(text=f"先决: {precond_score:.3f}")
 
             if precond_score < PRECONDITION_THRESHOLD:
                 if DEBUG:
+                    lbl_precond.configure(text=f"先决: {precond_score:.3f}")
                     print(f"先决条件不满足 ({precond_score:.3f} < {PRECONDITION_THRESHOLD})，等待重试")
                 time.sleep(SLEEP_INTERVAL)
                 continue
@@ -121,41 +114,44 @@ def main():
                 net_res = cv2.matchTemplate(net_gray, _NET_RESET_TEMPLATE, cv2.TM_CCOEFF_NORMED)
                 net_score = float(cv2.minMaxLoc(net_res)[1])
                 if net_score >= NET_RESET_THRESHOLD:
-                    print(f"牌面检测 5 次一致，匹配到网络断开画面 (匹配度 {net_score:.3f})，执行重连")
+                    print(f"[{time.strftime('%H:%M:%S')}] 牌面检测 5 次一致，匹配到网络断开画面 (匹配度 {net_score:.3f})，执行重连")
                     relaunch.run()
                     prev_cap = None
                     same_count = 1
                     detect_repeat = 1
                     last_detect = (None, None)
                     continue
-                print("牌面 5 次一致但非网络断开，继续正常流程")
+                if DEBUG:
+                    print(f"[{time.strftime('%H:%M:%S')}] 牌面 5 次一致但非网络断开，继续正常流程")
                 detect_repeat = 1
 
             # ===== OCR 分数检测 =====
             score = check_number(last_score, num_cap)
-            print(f"分数: {score}")
             if score != '---':
                 m = re.match(r'(\d+)/(\d+)', score)
                 if m:
                     last_score = int(m.group(1))
             else:
-                print("分数: 未识别，跳过本轮")
+                if DEBUG:
+                    lbl_score.configure(text=f"分数: {score}")
+                    print("分数: 未识别，跳过本轮")
                 continue
+
+            if DEBUG:
+                lbl_score.configure(text=f"分数: {score}")
 
             if last_score < NUM_ALARM:
                 ui.alarm(f"分数 {last_score}，低于 {NUM_ALARM}!")
                 continue
-            if DEBUG:
-                lbl_score.configure(text=f"分数: {score}")
 
             # ===== 决策：自摸 / 跳过 =====
-            if name and is_target and key in TARGET_NAMES and conf >= need:
+            need_tsumo = name and is_target and key in TARGET_NAMES and conf >= need
+
+            if need_tsumo:
                 if ui.paused:
                     continue
                 if DEBUG:
-                    lbl_action.configure(text=f"自摸  {key} ({conf}/{need})", fg='#006600')
-                    root.update()
-                click_tsumo(key, conf, need)
+                    action_text = f"自摸  {key} ({conf}/{need})"
             else:
                 if name and is_target and key in TARGET_NAMES:
                     info = f"{key} 匹配度{conf} < 阈值{need}"
@@ -164,16 +160,28 @@ def main():
                 else:
                     info = "无匹配"
                 if DEBUG:
-                    if name:
-                        lbl_action.configure(text=f"跳过  {key} ({conf}/{need})", fg='#cc6600')
-                    else:
-                        lbl_action.configure(text=f"跳过  无匹配", fg='#cc6600')
-                    root.update()
+                    action_text = f"跳过  {key} ({conf}/{need})" if name else "跳过  无匹配"
+
+            # ===== Debug 标签更新（点击前）=====
+            if DEBUG:
+                elapsed = time.time() - ui.START_TIME
+                lbl_elapsed.configure(text=f"已运行: {int(elapsed//3600):02d}:{int((elapsed%3600)//60):02d}:{int(elapsed%60):02d}")
+                lbl_restarts.configure(text=f"重启次数: {relaunch.RESTART_COUNT}")
+                lbl_last_restart.configure(text=f"上次重启: {relaunch.LAST_RESTART or '---'}")
+                lbl_precond.configure(text=f"先决: {precond_score:.3f}")
+                if action_text:
+                    lbl_action.configure(text=action_text, fg='#006600' if '自摸' in action_text else '#cc6600')
+                root.update()
+                print("-" * 60)
+
+            # ===== 执行点击 =====
+            if need_tsumo:
+                click_tsumo(key, conf, need)
+            else:
                 click_skip(info)
 
             # ===== 循环间隔 =====
             time.sleep(LOOP_SLEEP)
-            print("-" * 60)
 
         except (SystemExit, KeyboardInterrupt):
             raise

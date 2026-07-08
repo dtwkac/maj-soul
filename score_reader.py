@@ -53,12 +53,14 @@ def check_number(prev_score=None, num_cap=None):
                 if prev_score is None or cur >= prev_score - 8 or (prev == (cur, total) and cur >= NUM_ALARM):
                     prev = (cur, total)
                     return text
-            print(f"分数检测异常({prev_score}→{cur})，等待稳定")
+            if DEBUG:
+                print(f"分数检测异常({prev_score}→{cur})，等待稳定")
         else:
             prev = None
         mismatch += 1
         p = f"{old[0]}/{old[1]}" if old else "无"
-        print(f"分数不匹配({mismatch}) 上次:{p} 当前:{text}，重试")
+        if DEBUG:
+            print(f"分数不匹配({mismatch}) 上次:{p} 当前:{text}，重试")
         # 累计异常次数达到上限 → 报警
         if mismatch >= RETRY_LIMIT:
             mismatch = 0

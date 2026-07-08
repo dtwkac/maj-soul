@@ -5,7 +5,7 @@ import mss
 import pyautogui
 import winsound
 import ui
-from consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_INTERVAL
+from consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_INTERVAL, DEBUG
 from consts import RELAUNCH_DIR, RELAUNCH_QYZZ_REGION, RELAUNCH_QYZZ_CLICK
 from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, RELAUNCH_PRECOND_REGION
 from consts import PRECONDITION_TEMPLATE
@@ -27,21 +27,26 @@ def _match(region, template):
 def _wait(region, template, label, click_pos=None):
     for attempt in range(1, RETRY_LIMIT + 1):
         score = _match(region, template)
-        print(f"  [{attempt}/{RETRY_LIMIT}] {label} 匹配度: {score:.3f}")
+        if DEBUG:
+            print(f"  [{attempt}/{RETRY_LIMIT}] {label} 匹配度: {score:.3f}")
         if score >= RELAUNCH_THRESHOLD:
             if click_pos:
                 pyautogui.click(*click_pos)
-                print(f"  {label} 匹配，点击 {click_pos}")
+                if DEBUG:
+                    print(f"  {label} 匹配，点击 {click_pos}")
                 time.sleep(5)
                 while _match(region, template) >= RELAUNCH_THRESHOLD:
                     pyautogui.click(*click_pos)
-                    print(f"  {label} 画面未改变，再次点击 {click_pos}")
+                    if DEBUG:
+                        print(f"  {label} 画面未改变，再次点击 {click_pos}")
                     time.sleep(5)
             else:
-                print(f"  {label} 匹配")
+                if DEBUG:
+                    print(f"  {label} 匹配")
             return True
         if attempt < RETRY_LIMIT:
-            print(f"  等待 {RELAUNCH_INTERVAL}s 后重试...")
+            if DEBUG:
+                print(f"  等待 {RELAUNCH_INTERVAL}s 后重试...")
             time.sleep(RELAUNCH_INTERVAL)
     print(f"  重连失败: {label} 匹配超限")
     return False
@@ -54,7 +59,8 @@ def run():
     LAST_RESTART = t
     for i in range(10):
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-        print(f"警告音 {i+1}/10")
+        if DEBUG:
+            print(f"警告音 {i+1}/10")
         time.sleep(1)
     pyautogui.click(365, 25)      # 新建标签页
     time.sleep(1)
@@ -64,7 +70,7 @@ def run():
     time.sleep(1)
     pyautogui.click(310, 30)      # 关闭旧标签页
     time.sleep(1)
-    print("已执行重启标签页操作，等待 30s...")
+    print("已执行重启标签页操作")
     time.sleep(30)
 
     if not _wait(RELAUNCH_QYZZ_REGION, _QYZZ, "qyzz", RELAUNCH_QYZZ_CLICK):
