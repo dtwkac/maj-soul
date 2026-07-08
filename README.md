@@ -95,13 +95,11 @@ tools/
 |------|------|------|
 | `TILE_REGION` | (450, 885, 90, 140) | 牌面截图区域 (left, top, width, height) |
 | `NUM_REGION` | (365, 805, 125, 30) | 分数数字区域 |
-| `PRECONDITION_REGION` | (475, 885, 35, 20) | 先决条件截图区域 |
 | `CENTER` | (960, 540) | 屏幕中心（连点/鼠标复位） |
 | `TSUMO_BTN` | (1200, 820) | 自摸按钮 |
 | `SKIP_BTN` | (500, 950) | 跳过按钮 |
-| `RELAUNCH_BTN` | (165, 80) | 刷新按钮 |
-| `RELAUNCH_QYZZ_REGION` | (1635, 720, 110, 100) | qyzz 检测区域 |
-| `RELAUNCH_QYZZ_CLICK` | (1695, 775) | qyzz 按钮 |
+| `RELAUNCH_QYZZ_REGION` | (1635, 600, 110, 100) | qyzz 检测区域 |
+| `RELAUNCH_QYZZ_CLICK` | (1695, 655) | qyzz 按钮 |
 | `RELAUNCH_CONTINUE_REGION` | (795, 860, 330, 90) | continue 检测区域 |
 | `RELAUNCH_CONTINUE_CLICK` | (870, 900) | continue 按钮 |
 | `RELAUNCH_PRECOND_REGION` | (475, 885, 35, 20) | 重连完成先决条件检测区域 |
@@ -118,7 +116,7 @@ tools/
 | `SLEEP_INTERVAL` | 0.2 | 检测/重试刷新间隔（秒） |
 | `PRECONDITION_THRESHOLD` | 0.9 | 先决条件匹配阈值（TM_CCOEFF_NORMED，范围 0~1） |
 | `RELAUNCH_THRESHOLD` | 0.9 | 重连画面匹配阈值 |
-| `RELAUNCH_INTERVAL` | 15 | 重连重试间隔（秒） |
+| `RELAUNCH_INTERVAL` | 10 | 重连重试间隔（秒） |
 | `RELAUNCH_DIR` | `pics/relaunch/` | 重连模板目录 |
 | `NET_RESET_THRESHOLD` | 0.9 | 网络断连画面匹配阈值 |
 
@@ -227,12 +225,12 @@ OCR 灰度图 3 倍放大后直出 Tesseract（PSM 7），分数大幅下降时�
 - 每轮对牌面 ROI 进行像素级比较（`np.array_equal`），连续 3 次相同时悬停跳过按钮重新截图比对，仍相同则播放 10 次警告音（每次间隔 1s），播放完成后触发重连（`relaunch.run`）
 - 卡住检测位于先决条件检测之前，确保始终运行不受先决条件控制流影响
 - 额外网络断连检测：ORB 识别结果连续 5 次相同时，截取 (645,405)–(1275,765) 区域与 `net_reset.png` 模板匹配（`TM_CCOEFF_NORMED`，阈值 0.9）；匹配则直接重连，不等待像素卡住
-- 重连流程依次尝试匹配刷新按钮、qyzz 画面、continue 画面、先决条件，全通过后继续主循环；任一步骤超限则回调 `ui.alarm` 报警
+- 重连流程依次新建标签页、匹配 qyzz 画面、匹配 continue 画面、匹配先决条件，全通过后继续主循环；任一步骤超限则回调 `ui.alarm` 报警
 
 ### 重连模块
-- `relaunch.py` 封装完整重连流程：点击刷新按钮（165, 80）→ 等待 30s → 匹配 qyzz 画面 → 点击 qyzz 按钮 → 匹配 continue 画面 → 点击 continue 按钮 → 匹配先决条件 → 全部成功后继续主循环
-- 每个匹配步骤使用 `cv2.matchTemplate(TM_CCOEFF_NORMED)`，阈值 0.9，重试上限 5 次，间隔 15s
-- `relaunch.run()` 先播放 10 次警告音（每次间隔 1s），再执行刷新按钮点击等重连操作（区别于报警音）
+- `relaunch.py` 封装完整重连流程：新建标签页（365, 25）→ 收藏夹（40, 120）→ 网页（85, 290）→ 关闭旧标签（310, 30）→ 等待 30s → 匹配 qyzz 画面 → 点击 qyzz 按钮（静音 105, 25）→ 匹配 continue 画面 → 点击 continue 按钮 → 匹配先决条件 → 全部成功后继续主循环
+- 每个匹配步骤使用 `cv2.matchTemplate(TM_CCOEFF_NORMED)`，阈值 0.9，重试上限 5 次，间隔 10s
+- `relaunch.run()` 先播放 10 次警告音（每次间隔 1s），再执行新建标签页等重连操作（区别于报警音）
 - 任一步骤超限则回调 `ui.alarm` 报警
 
 ### 模板目录

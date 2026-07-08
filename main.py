@@ -12,7 +12,7 @@ import mss
 import ui
 import relaunch
 from consts import DEBUG, CENTER, SKIP_BTN, THRESHOLD_DEFAULT, LOOP_SLEEP, SLEEP_INTERVAL, TARGET_NAMES, PRECONDITION_THRESHOLD, NUM_ALARM
-from consts import NET_RESET_REGION, NET_RESET_THRESHOLD
+from consts import NET_RESET_REGION, NET_RESET_THRESHOLD, TILE_REGION, NUM_REGION
 from capture import grab_combined
 from tile_matcher import best_match, check_precondition
 from score_reader import check_number
@@ -49,8 +49,9 @@ def main():
 
             # ===== 合并截屏 =====
             combined = grab_combined()
-            cap = combined[80:220, 85:175]      # 牌面 ROI
-            num_cap = combined[0:30, 0:125]     # 分数 ROI
+            cap = combined[TILE_REGION[1] - NUM_REGION[1] : TILE_REGION[1] + TILE_REGION[3] - NUM_REGION[1],
+                           TILE_REGION[0] - NUM_REGION[0] : TILE_REGION[0] + TILE_REGION[2] - NUM_REGION[0]]
+            num_cap = combined[0 : NUM_REGION[3], 0 : NUM_REGION[2]]
 
             # ===== 卡住检测（始终运行，先于先决条件）=====
             if prev_cap is not None and np.array_equal(cap, prev_cap):
@@ -73,7 +74,8 @@ def main():
                 pyautogui.moveTo(*SKIP_BTN)
                 time.sleep(1)
                 combined = grab_combined()
-                cap = combined[80:220, 85:175]
+                cap = combined[TILE_REGION[1] - NUM_REGION[1] : TILE_REGION[1] + TILE_REGION[3] - NUM_REGION[1],
+                               TILE_REGION[0] - NUM_REGION[0] : TILE_REGION[0] + TILE_REGION[2] - NUM_REGION[0]]
                 if np.array_equal(cap, prev_cap):
                     if DEBUG:
                         print("卡住确认: 悬停处重新截图与上一帧仍相同，执行重连")

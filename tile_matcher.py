@@ -13,7 +13,7 @@ def _load_templates(folder, is_target):
         img = cv2.imread(os.path.join(folder, f), cv2.IMREAD_GRAYSCALE)
         if img is None:
             continue
-        kp, des = _ORB.detectAndCompute(img, None)
+        _, des = _ORB.detectAndCompute(img, None)
         items.append((f, des, is_target))
     return items
 

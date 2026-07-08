@@ -6,7 +6,7 @@ import pyautogui
 import winsound
 import ui
 from consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_INTERVAL
-from consts import RELAUNCH_DIR, RELAUNCH_BTN, RELAUNCH_QYZZ_REGION, RELAUNCH_QYZZ_CLICK
+from consts import RELAUNCH_DIR, RELAUNCH_QYZZ_REGION, RELAUNCH_QYZZ_CLICK
 from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, RELAUNCH_PRECOND_REGION
 from consts import PRECONDITION_TEMPLATE
 
@@ -56,15 +56,22 @@ def run():
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print(f"警告音 {i+1}/10")
         time.sleep(1)
-    pyautogui.moveTo(*RELAUNCH_BTN)
+    pyautogui.click(365, 25)      # 新建标签页
     time.sleep(1)
-    pyautogui.click(*RELAUNCH_BTN)
-    print("已点击刷新，等待 30s...")
+    pyautogui.click(40, 120)      # 收藏夹
+    time.sleep(1)
+    pyautogui.click(85, 290)      # 网页
+    time.sleep(1)
+    pyautogui.click(310, 30)      # 关闭旧标签页
+    time.sleep(1)
+    print("已执行重启标签页操作，等待 30s...")
     time.sleep(30)
 
     if not _wait(RELAUNCH_QYZZ_REGION, _QYZZ, "qyzz", RELAUNCH_QYZZ_CLICK):
         ui.alarm("重连失败: qyzz 匹配超限")
         return
+    pyautogui.click(105, 25)      # 静音
+    time.sleep(1)
     if not _wait(RELAUNCH_CONTINUE_REGION, _CONTINUE, "continue", RELAUNCH_CONTINUE_CLICK):
         ui.alarm("重连失败: continue 匹配超限")
         return

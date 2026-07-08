@@ -50,6 +50,8 @@ def pause_dialog():
 
 def setup_debug_window():
     root = tk.Tk()
+    root.withdraw()
+    root.attributes('-alpha', 0.0)
     root.title("雀魂检测")
     root.attributes('-topmost', True)
     root.resizable(False, False)
@@ -77,13 +79,16 @@ def setup_debug_window():
     lbl_action = tk.Label(frame, text="等待中...", font=('Consolas', 16, 'bold'), bg='#ffffff', fg='#888')
     lbl_action.pack(anchor=tk.W)
 
-    root.update()
     root.geometry("260x280+0+0")
+    root.update_idletasks()
+    root.deiconify()
     root.update()
     off_x = frame.winfo_rootx()
     off_y = frame.winfo_rooty()
     new_x = 540 - off_x - root.winfo_width()
     new_y = 770 - off_y - root.winfo_height()
     root.geometry(f"+{new_x}+{new_y}")
+    root.attributes('-alpha', 1.0)
+    root.update()
 
     return root, lbl_score, lbl_action, lbl_precond, lbl_elapsed, lbl_restarts, lbl_last_restart
