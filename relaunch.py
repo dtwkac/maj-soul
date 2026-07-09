@@ -70,7 +70,6 @@ def run():
     time.sleep(1)
     pyautogui.click(310, 30)      # 关闭旧标签页
     time.sleep(1)
-    print("已执行重启标签页操作")
     time.sleep(30)
 
     if not _wait(RELAUNCH_QYZZ_REGION, _QYZZ, "qyzz", RELAUNCH_QYZZ_CLICK):
@@ -84,4 +83,4 @@ def run():
     if not _wait(RELAUNCH_PRECOND_REGION, _PRECOND, "先决条件"):
         ui.alarm("重连失败: 先决条件匹配超限")
         return
-    print("重连完成")
+    print(f"[{time.strftime('%H:%M:%S')}] 重连完成")
