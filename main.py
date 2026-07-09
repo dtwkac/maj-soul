@@ -28,7 +28,7 @@ def main():
     if ret != 1:
         os._exit(0)
     ui.START_TIME = time.time()
-    print("开始!")
+    print(f"[{time.strftime('%H:%M:%S')}] 开始")
 
     if DEBUG:
         root, lbl_score, lbl_action, lbl_precond, lbl_elapsed, lbl_restarts, lbl_last_restart = ui.setup_debug_window()
