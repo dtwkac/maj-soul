@@ -64,12 +64,11 @@ def run():
         time.sleep(1)
     pyautogui.click(365, 25)      # 新建标签页
     time.sleep(1)
+    pyautogui.click(310, 30)      # 关闭旧标签页
+    time.sleep(1)
     pyautogui.click(40, 120)      # 收藏夹
     time.sleep(1)
     pyautogui.click(85, 290)      # 网页
-    time.sleep(1)
-    pyautogui.click(310, 30)      # 关闭旧标签页
-    time.sleep(1)
     time.sleep(30)
 
     if not _wait(RELAUNCH_QYZZ_REGION, _QYZZ, "qyzz", RELAUNCH_QYZZ_CLICK):
