@@ -14,7 +14,8 @@ INTERVAL = 0.2
 RESTART_INTERVAL = 3600
 TILE_REGION = (1385, 885, 90, 140)
 PRECOND_REGION = (1415, 885, 30, 20)
-_PRECOND_TEMPLATE = cv2.imread('pics/pre.png', cv2.IMREAD_GRAYSCALE)
+_PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
+_PRECOND_TEMPLATE2 = cv2.imread('pics/pre2.png', cv2.IMREAD_GRAYSCALE)
 
 relaunch.RELAUNCH_QYZZ_REGION = (1635, 720, 110, 100)
 relaunch.RELAUNCH_QYZZ_CLICK = (1695, 775)
@@ -50,7 +51,7 @@ def do_restart():
         if not relaunch._wait(RELAUNCH_CONTINUE_REGION, relaunch._CONTINUE, "continue", RELAUNCH_CONTINUE_CLICK):
             ui.alarm("重启失败: continue 超限")
             return
-        if not relaunch._wait(PRECOND_REGION, _PRECOND_TEMPLATE, "先决条件"):
+        if not relaunch._wait_any(PRECOND_REGION, [_PRECOND_TEMPLATE1, _PRECOND_TEMPLATE2], "先决条件"):
             ui.alarm("重启失败: 先决条件超限")
             return
         print(f"[{time.strftime('%H:%M:%S')}] 重启完成，继续连点")

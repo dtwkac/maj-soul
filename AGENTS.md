@@ -42,7 +42,8 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `pics/relaunch/` — 重连匹配模板（qyzz1.png, qyzz2.png, continue.png）
 - `pics/net_reset.png` — 网络断开画面模板
 - `pics/precondition.png` — 先决条件模板（tsumo19d 控制重试）
-- `pics/pre.png` — 先决条件模板（zi/auto_clicker 使用）
+- `pics/pre1.png` — 先决条件模板1（zi/auto_clicker 使用）
+- `pics/pre2.png` — 先决条件模板2（zi/auto_clicker 使用，任一匹配即通过）
 - `Tesseract-OCR/` — 本地 Tesseract 安装目录（已在 .gitignore）
 
 ## 约束

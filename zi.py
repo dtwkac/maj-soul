@@ -23,7 +23,8 @@ _SKIP_BTN = (1430, 950)
 _TSUMO_BTN = (1200, 820)
 
 _ZI_DIR = r'D:\workspace\maj-soul\pics\zi'
-_PRECOND_TEMPLATE = cv2.imread(r'D:\workspace\maj-soul\pics\pre.png', cv2.IMREAD_GRAYSCALE)
+_PRECOND_TEMPLATE1 = cv2.imread(r'D:\workspace\maj-soul\pics\pre1.png', cv2.IMREAD_GRAYSCALE)
+_PRECOND_TEMPLATE2 = cv2.imread(r'D:\workspace\maj-soul\pics\pre2.png', cv2.IMREAD_GRAYSCALE)
 
 _ORB = cv2.ORB_create(nfeatures=200)
 _BF = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
@@ -42,13 +43,20 @@ if not _zi_templates:
     print("错误: 没有字牌模板图片!"); exit(1)
 
 def check_precondition():
-    if _PRECOND_TEMPLATE is None:
+    if _PRECOND_TEMPLATE1 is None and _PRECOND_TEMPLATE2 is None:
         return 0.0
     img = np.asarray(_SCT.grab({"left": PRECOND_REGION[0], "top": PRECOND_REGION[1],
                                  "width": PRECOND_REGION[2], "height": PRECOND_REGION[3]}))
     gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
-    result = cv2.matchTemplate(gray, _PRECOND_TEMPLATE, cv2.TM_CCOEFF_NORMED)
-    return float(cv2.minMaxLoc(result)[1])
+    best_score = 0.0
+    for tmpl in [_PRECOND_TEMPLATE1, _PRECOND_TEMPLATE2]:
+        if tmpl is None:
+            continue
+        result = cv2.matchTemplate(gray, tmpl, cv2.TM_CCOEFF_NORMED)
+        score = float(cv2.minMaxLoc(result)[1])
+        if score > best_score:
+            best_score = score
+    return best_score
 
 def check_zi(cap):
     gray = cv2.cvtColor(cap, cv2.COLOR_BGRA2GRAY)

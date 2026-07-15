@@ -2,9 +2,13 @@
 
 1920×1080 分辨率下自动识别牌面、匹配目标牌、点击自摸/跳过的 Python 脚本。
 
-本脚本适用于以下及类似卡片阵容（冬实效果的牌触发自摸，其余触发跳过）：
+**tsumo19d.py** 适用于卡片阵容1（冬实效果的牌触发自摸，其余触发跳过）：
 
-![完整卡片阵容](pics/card_lineup.png)
+![卡片阵容1](pics/card_lineup1.png)
+
+**auto_clicker.py** 适用于卡片阵容2：
+
+![卡片阵容2](pics/card_lineup2.png)
 
 ## 原理
 
@@ -95,7 +99,8 @@ pics/
 │   └── continue.png
 ├── net_reset.png     # 网络断开画面模板
 ├── precondition.png  # 先决条件模板（tsumo19d）
-└── pre.png           # 先决条件模板（zi/auto_clicker）
+├── pre1.png          # 先决条件模板1（zi/auto_clicker）
+└── pre2.png          # 先决条件模板2（zi/auto_clicker，任一匹配即通过）
 tools/
 ├── mouse_pos.py       # 坐标捕获工具
 └── threshold_test.py  # 阈值检测测试工具
