@@ -90,7 +90,8 @@ pics/
 │   ├── xi.png
 │   └── zhong.png
 ├── relaunch/         # 重连匹配模板
-│   ├── qyzz.png
+│   ├── qyzz1.png
+│   ├── qyzz2.png
 │   └── continue.png
 ├── net_reset.png     # 网络断开画面模板
 ├── precondition.png  # 先决条件模板（tsumo19d）

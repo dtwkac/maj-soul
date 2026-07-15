@@ -18,7 +18,6 @@ _PRECOND_TEMPLATE = cv2.imread('pics/pre.png', cv2.IMREAD_GRAYSCALE)
 
 relaunch.RELAUNCH_QYZZ_REGION = (1635, 720, 110, 100)
 relaunch.RELAUNCH_QYZZ_CLICK = (1695, 775)
-relaunch._QYZZ = cv2.imread('pics/relaunch/qyzz_down.png', cv2.IMREAD_GRAYSCALE)
 
 _orig_play = winsound.PlaySound
 
@@ -43,7 +42,7 @@ def do_restart():
         time.sleep(1)
         pyautogui.click(85, 290)
         time.sleep(30)
-        if not relaunch._wait(relaunch.RELAUNCH_QYZZ_REGION, relaunch._QYZZ, "qyzz", relaunch.RELAUNCH_QYZZ_CLICK):
+        if not relaunch._wait_any(relaunch.RELAUNCH_QYZZ_REGION, [relaunch._QYZZ1, relaunch._QYZZ2], "qyzz", relaunch.RELAUNCH_QYZZ_CLICK):
             ui.alarm("重启失败: qyzz 超限")
             return
         pyautogui.click(105, 25)

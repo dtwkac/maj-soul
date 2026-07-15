@@ -13,7 +13,8 @@ from consts import RELAUNCH_DIR, RELAUNCH_QYZZ_REGION, RELAUNCH_QYZZ_CLICK
 from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, RELAUNCH_PRECOND_REGION
 from consts import PRECONDITION_TEMPLATE
 
-_QYZZ = cv2.imread(f'{RELAUNCH_DIR}/qyzz.png', cv2.IMREAD_GRAYSCALE)
+_QYZZ1 = cv2.imread(f'{RELAUNCH_DIR}/qyzz1.png', cv2.IMREAD_GRAYSCALE)
+_QYZZ2 = cv2.imread(f'{RELAUNCH_DIR}/qyzz2.png', cv2.IMREAD_GRAYSCALE)
 _CONTINUE = cv2.imread(f'{RELAUNCH_DIR}/continue.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND = cv2.imread(PRECONDITION_TEMPLATE, cv2.IMREAD_GRAYSCALE)
 
@@ -54,6 +55,46 @@ def _wait(region, template, label, click_pos=None):
     print(f"  重连失败: {label} 匹配超限")
     return False
 
+def _wait_any(region, templates, label, click_pos=None):
+    for attempt in range(1, RETRY_LIMIT + 1):
+        best_score = 0
+        best_idx = 0
+        for i, tmpl in enumerate(templates):
+            score = _match(region, tmpl)
+            if score > best_score:
+                best_score = score
+                best_idx = i
+            if DEBUG:
+                print(f"  [{attempt}/{RETRY_LIMIT}] {label}[{i+1}] 匹配度: {score:.3f}")
+        if best_score >= RELAUNCH_THRESHOLD:
+            if click_pos:
+                pyautogui.click(*click_pos)
+                if DEBUG:
+                    print(f"  {label} 匹配(模板{best_idx+1})，点击 {click_pos}")
+                time.sleep(5)
+                while True:
+                    still_match = False
+                    for tmpl in templates:
+                        if _match(region, tmpl) >= RELAUNCH_THRESHOLD:
+                            still_match = True
+                            break
+                    if not still_match:
+                        break
+                    pyautogui.click(*click_pos)
+                    if DEBUG:
+                        print(f"  {label} 画面未改变，再次点击 {click_pos}")
+                    time.sleep(5)
+            else:
+                if DEBUG:
+                    print(f"  {label} 匹配(模板{best_idx+1})")
+            return True
+        if attempt < RETRY_LIMIT:
+            if DEBUG:
+                print(f"  等待 {RELAUNCH_INTERVAL}s 后重试...")
+            time.sleep(RELAUNCH_INTERVAL)
+    print(f"  重连失败: {label} 匹配超限")
+    return False
+
 def run():
     global RESTART_COUNT, LAST_RESTART
     t = time.strftime('%H:%M:%S')
@@ -74,7 +115,7 @@ def run():
     pyautogui.click(85, 290)      # 网页
     time.sleep(30)
 
-    if not _wait(RELAUNCH_QYZZ_REGION, _QYZZ, "qyzz", RELAUNCH_QYZZ_CLICK):
+    if not _wait_any(RELAUNCH_QYZZ_REGION, [_QYZZ1, _QYZZ2], "qyzz", RELAUNCH_QYZZ_CLICK):
         ui.alarm("重连失败: qyzz 匹配超限")
         return
     pyautogui.click(105, 25)      # 静音

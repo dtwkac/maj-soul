@@ -39,7 +39,7 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `pics/targets/` — 目标牌模板（触发自摸）
 - `pics/distractors/` — 干扰牌模板（触发跳过）
 - `pics/zi/` — 字牌模板（触发跳过：东南西北白中发）
-- `pics/relaunch/` — 重连匹配模板（qyzz.png, continue.png）
+- `pics/relaunch/` — 重连匹配模板（qyzz1.png, qyzz2.png, continue.png）
 - `pics/net_reset.png` — 网络断开画面模板
 - `pics/precondition.png` — 先决条件模板（tsumo19d 控制重试）
 - `pics/pre.png` — 先决条件模板（zi/auto_clicker 使用）
