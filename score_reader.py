@@ -3,10 +3,13 @@ import pytesseract
 import re
 import time
 import os
+import sys
 import shutil
-from consts import DEBUG, NUM_ALARM, RETRY_LIMIT, SLEEP_INTERVAL
+from consts import NUM_ALARM, RETRY_LIMIT, SLEEP_INTERVAL
 from capture import grab_combined
 import ui
+
+DEBUG = '--debug' in sys.argv
 
 _DEBUG_SAVED_SCORES = set()
 if DEBUG:

@@ -1,10 +1,7 @@
 import os
-import sys
 import pytesseract
 
 pytesseract.pytesseract.tesseract_cmd = r'D:\workspace\maj-soul\Tesseract-OCR\tesseract.exe'
-
-DEBUG = '--debug' in sys.argv
 
 NUM_ALARM = 81
 

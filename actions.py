@@ -1,6 +1,9 @@
 import pyautogui
 import time
-from consts import TSUMO_BTN, CENTER, SKIP_BTN, CLICK_TIMES, DEBUG
+import sys
+from consts import TSUMO_BTN, CENTER, SKIP_BTN, CLICK_TIMES
+
+DEBUG = '--debug' in sys.argv
 
 def click_tsumo(key, cnt, need):
     if DEBUG:

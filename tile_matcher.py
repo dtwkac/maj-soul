@@ -1,6 +1,9 @@
 import cv2
 import os
-from consts import DEBUG, TARGET_DIR, DISTRACTOR_DIR, PRECONDITION_TEMPLATE
+import sys
+from consts import TARGET_DIR, DISTRACTOR_DIR, PRECONDITION_TEMPLATE
+
+DEBUG = '--debug' in sys.argv
 
 _ORB = cv2.ORB_create(nfeatures=200)
 _BF = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)

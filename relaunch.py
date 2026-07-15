@@ -4,8 +4,11 @@ import numpy as np
 import mss
 import pyautogui
 import winsound
+import sys
 import ui
-from consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_INTERVAL, DEBUG
+from consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_INTERVAL
+
+DEBUG = '--debug' in sys.argv
 from consts import RELAUNCH_DIR, RELAUNCH_QYZZ_REGION, RELAUNCH_QYZZ_CLICK
 from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, RELAUNCH_PRECOND_REGION
 from consts import PRECONDITION_TEMPLATE

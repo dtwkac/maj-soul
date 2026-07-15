@@ -36,8 +36,12 @@ https://github.com/UB-Mannheim/tesseract/releases
 ## 使用
 
 ```bash
-uv run python main.py           # 静默运行（无信息窗口）
-uv run python main.py --debug   # 带 Tkinter 调试窗口
+uv run python tsumo19d.py           # 静默运行（无信息窗口）
+uv run python tsumo19d.py --debug   # 带 Tkinter 调试窗口
+uv run python zi.py                 # 字牌自摸/跳过（无信息窗口）
+uv run python zi.py --debug         # 字牌自摸/跳过（带调试日志）
+uv run python auto_clicker.py       # 连点器（自动重启）
+uv run python cloud_bottle.py       # 刷印章连点器（w 键暂停）
 ```
 
 运行后弹出确认窗口，点击"确定"开始运行，"取消"则安全退出。
@@ -47,6 +51,7 @@ uv run python main.py --debug   # 带 Tkinter 调试窗口
 | 按键 | 功能 |
 |------|------|
 | `Ctrl+.` | 暂停（弹窗确定继续 / 取消退出） |
+| `w` | cloud_bottle 暂停/恢复 |
 | 关闭控制台窗口 | 停止程序 |
 
 ## 模板配置
@@ -54,14 +59,17 @@ uv run python main.py --debug   # 带 Tkinter 调试窗口
 ### 目录结构
 
 ```
-consts.py              # 全部常量（坐标、阈值、路径、DEBUG 标志）
+consts.py              # 全部常量（坐标、阈值、路径）
 capture.py             # 截屏（mss，合并 175×223 区域）
 tile_matcher.py        # 牌型匹配（ORB 特征 + BFMatcher，模板加载）
 score_reader.py        # 分数检测（Tesseract OCR，含 debug 截图）
-clicker.py             # 点击动作（自摸/跳过）
+actions.py             # 点击动作（自摸/跳过）
 relaunch.py            # 重连模块（卡住时刷新游戏并等待回归）
 ui.py                  # 用户交互（报警、暂停弹窗、debug 窗口）
-main.py                # 入口，主循环
+tsumo19d.py            # 入口，主循环（仅自摸1/9序数牌和dong）
+zi.py                  # 字牌自摸/跳过（匹配 pics/zi* 则跳过，否则自摸）
+auto_clicker.py        # 连点器（自动定时重启，含先决条件判定）
+cloud_bottle.py        # 刷印章连点器（w 键暂停/恢复，暂停时悬停自摸坐标）
 pics/
 ├── targets/          # 目标牌模板（触发自摸）
 │   ├── 1m.png
@@ -73,9 +81,20 @@ pics/
 ├── distractors/      # 干扰牌模板（触发跳过）
 │   ├── 7p.png
 │   └── 7s.png
-└── relaunch/         # 重连匹配模板
-    ├── qyzz.png
-    └── continue.png
+├── zi/               # 字牌模板（触发跳过）
+│   ├── bai.png
+│   ├── bei.png
+│   ├── dong.png
+│   ├── fa.png
+│   ├── nan.png
+│   ├── xi.png
+│   └── zhong.png
+├── relaunch/         # 重连匹配模板
+│   ├── qyzz.png
+│   └── continue.png
+├── net_reset.png     # 网络断开画面模板
+├── precondition.png  # 先决条件模板（tsumo19d）
+└── pre.png           # 先决条件模板（zi/auto_clicker）
 tools/
 ├── mouse_pos.py       # 坐标捕获工具
 └── threshold_test.py  # 阈值检测测试工具

@@ -6,17 +6,20 @@ import numpy as np
 import re
 import traceback
 import os
+import sys
 import pyautogui
 import mss
 
 import ui
 import relaunch
-from consts import DEBUG, CENTER, SKIP_BTN, THRESHOLD_DEFAULT, LOOP_SLEEP, SLEEP_INTERVAL, TARGET_NAMES, PRECONDITION_THRESHOLD, NUM_ALARM
+from consts import CENTER, SKIP_BTN, THRESHOLD_DEFAULT, LOOP_SLEEP, SLEEP_INTERVAL, TARGET_NAMES, PRECONDITION_THRESHOLD, NUM_ALARM
+
+DEBUG = '--debug' in sys.argv
 from consts import NET_RESET_REGION, NET_RESET_THRESHOLD, TILE_REGION, NUM_REGION
 from capture import grab_combined
 from tile_matcher import best_match, check_precondition
 from score_reader import check_number
-from clicker import click_tsumo, click_skip
+from actions import click_tsumo, click_skip
 
 _NET_RESET_TEMPLATE = cv2.imread('pics/net_reset.png', cv2.IMREAD_GRAYSCALE)
 _NET_SCT = mss.MSS()
