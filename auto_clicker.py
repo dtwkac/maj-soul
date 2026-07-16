@@ -4,7 +4,7 @@ import time
 import relaunch
 import winsound
 import cv2
-from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK
+from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER
 import ui
 
 pyautogui.PAUSE = 0
@@ -47,7 +47,6 @@ def do_restart():
             ui.alarm("重启失败: qyzz 超限")
             return
         pyautogui.click(105, 25)
-        time.sleep(1)
         if not relaunch._wait(RELAUNCH_CONTINUE_REGION, relaunch._CONTINUE, "continue", RELAUNCH_CONTINUE_CLICK):
             ui.alarm("重启失败: continue 超限")
             return
@@ -55,6 +54,8 @@ def do_restart():
             ui.alarm("重启失败: 先决条件超限")
             return
         print(f"[{time.strftime('%H:%M:%S')}] 重启完成，继续连点")
+        pyautogui.moveTo(*CENTER)
+        time.sleep(1)
     finally:
         winsound.PlaySound = _orig_play
 
@@ -64,13 +65,11 @@ print(f"连点器启动: ({X}, {Y}), 间隔 {INTERVAL}s, 重启间隔 {RESTART_I
 print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 
 do_restart()
-CENTER = (960, 540)
 
 try:
     while True:
         for _ in range(int(RESTART_INTERVAL / INTERVAL)):
             if not paused:
-                pyautogui.moveTo(*CENTER)
                 pyautogui.click(X, Y)
             time.sleep(INTERVAL)
         print(f"[{time.strftime('%H:%M:%S')}] 已满 {RESTART_INTERVAL}s，执行重启")
