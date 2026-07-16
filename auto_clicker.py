@@ -1,6 +1,7 @@
 import pyautogui
 import keyboard
 import time
+import random
 import relaunch
 import winsound
 import cv2
