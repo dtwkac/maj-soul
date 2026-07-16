@@ -70,8 +70,11 @@ try:
     while True:
         for _ in range(int(RESTART_INTERVAL / INTERVAL)):
             if not paused:
-                pyautogui.click(X, Y)
-            time.sleep(INTERVAL)
+                dx = random.randint(-5, 5)
+                dy = random.randint(-5, 5)
+                pyautogui.click(X + dx, Y + dy)
+            dt = random.randint(-50, 50) / 1000
+            time.sleep(INTERVAL + dt)
         print(f"[{time.strftime('%H:%M:%S')}] 已满 {RESTART_INTERVAL}s，执行重启")
         do_restart()
 except KeyboardInterrupt:
