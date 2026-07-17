@@ -33,7 +33,7 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `tsumo19d.py` — 入口，主循环（仅自摸1/9序数牌和dong）
 - `zi.py` — 字牌自摸/跳过（匹配 pics/zi* 则跳过，否则自摸）
 - `auto_clicker.py` — 连点器（自动定时重启，含先决条件判定）
-- `speedhack.py` — CE加速模块（自动打开CE，OCR匹配firefox PID，设置5倍速）
+- `speedhack.py` — CE加速模块（自动打开CE，OCR精确匹配firefox PID，设置5倍速；含CE进程检测/关闭）
 - `cloud_bottle.py` — 刷印章连点器（w 键暂停/恢复，暂停时悬停自摸坐标）
 - `tools/mouse_pos.py` — 获取屏幕坐标的辅助工具（Tkinter 悬浮窗）
 - `tools/threshold_test.py` — 阈值检测测试工具（Tkinter GUI）
@@ -67,3 +67,8 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - 常规日志仅保留时间戳标注的关键事件：卡住确认（先决条件前的悬停重连）、网络断连匹配、重连触发流程、重连完成；其余诊断信息（牌面匹配特征、OCR 重试详情、匹配进度、分隔线等）均仅在 DEBUG 模式输出
 - `Tesseract-OCR/`（已在 .gitignore）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
+
+### speedhack 流程
+- `do_restart()` 内重启完成后依次执行：`moveTo(CENTER)` → `speedhack()`
+- `speedhack()` 启动前调用 `kill_ce()` 关闭已有 CE 进程（进程名 `cheatengine-x86_64-SSE4-AVX2.exe`）
+- 步骤：tasklist 获取最大内存 firefox PID → 转8位hex → 启动CE（检测进程是否运行） → OCR识别进程列表（截屏区域 left=827） → 逐字符比对pid16精确匹配（无容差） → 页翻找（pagedown×3到底，pageup最多10次） → 点击Open → Enable Speedhack → Ctrl+A全选+Backspace清除+输入5 → 悬停1s → Apply → firefox回前台
