@@ -2,27 +2,30 @@ import pyautogui
 import keyboard
 import time
 import random
+import sys
 import relaunch
 import winsound
 import cv2
+import mss
+import numpy as np
+import pytesseract
 from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER
 from speedhack import speedhack, kill_ce
 import ui
 
 pyautogui.PAUSE = 0
 
-def _fmt_secs(s):
-    if s >= 60 and s % 60 == 0:
-        return f"{s // 60}min"
-    return f"{s}s"
+DEBUG = '--debug' in sys.argv
 
 X, Y = 1200, 815
 INTERVAL = 0.2
-RESTART_INTERVAL = 1500
-TILE_REGION = (1385, 885, 90, 140)
+DETECT_INTERVAL = 5
+_DETECT_REGION = {"left": 1637, "top": 170, "width": 93, "height": 27}
 PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND_TEMPLATE2 = cv2.imread('pics/pre2.png', cv2.IMREAD_GRAYSCALE)
+
+_sct = mss.MSS()
 
 relaunch.RELAUNCH_QYZZ_REGION = (1635, 720, 110, 100)
 relaunch.RELAUNCH_QYZZ_CLICK = (1695, 775)
@@ -35,6 +38,13 @@ def toggle_pause():
     global paused
     paused = not paused
     print("已暂停" if paused else "继续运行")
+
+def detect_value():
+    img = np.asarray(_sct.grab(_DETECT_REGION))
+    gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
+    _, gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    text = pytesseract.image_to_string(gray, config='--psm 7 -c tessedit_char_whitelist=0123456789').strip()
+    return text if text else None
 
 def do_restart():
     winsound.PlaySound = lambda *a, **k: None
@@ -71,20 +81,31 @@ def do_restart():
 
 keyboard.add_hotkey('ctrl+.', toggle_pause)
 
-print(f"连点器启动: ({X}, {Y}), 间隔 {INTERVAL}s, 重启间隔 {_fmt_secs(RESTART_INTERVAL)}")
+print(f"连点器启动: ({X}, {Y}), 间隔 {INTERVAL}s, 检测间隔 {DETECT_INTERVAL}s")
 print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 
 do_restart()
 
+prev_value = None
 try:
+    last_detect = 0
     while True:
-        for _ in range(int(RESTART_INTERVAL / INTERVAL)):
-            if not paused:
-                dx = random.randint(-5, 5)
-                dy = random.randint(-5, 5)
-                pyautogui.click(X + dx, Y + dy)
-            time.sleep(INTERVAL)
-        print(f"[{time.strftime('%H:%M:%S')}] 已满 {_fmt_secs(RESTART_INTERVAL)}，执行重启")
-        do_restart()
+        if not paused:
+            dx = random.randint(-5, 5)
+            dy = random.randint(-5, 5)
+            pyautogui.click(X + dx, Y + dy)
+        now = time.time()
+        if now - last_detect >= DETECT_INTERVAL:
+            last_detect = now
+            val = detect_value()
+            if DEBUG:
+                print(f"  检测值: {val}")
+            if val is not None and val == prev_value:
+                print(f"[{time.strftime('%H:%M:%S')}] 检测值连续相同({val})，执行重启")
+                do_restart()
+                prev_value = None
+            else:
+                prev_value = val
+        time.sleep(INTERVAL)
 except KeyboardInterrupt:
     print("\n已停止")
