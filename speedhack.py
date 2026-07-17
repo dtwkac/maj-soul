@@ -182,5 +182,7 @@ def speedhack():
     # 步骤9: firefox回到前台
     if DEBUG:
         print("  [步骤9] firefox前台")
+    pyautogui.moveTo(1800, 540)
+    time.sleep(1)
     pyautogui.click(1800, 540)
     print("speedhack 已设置")
