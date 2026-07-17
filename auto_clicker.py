@@ -11,6 +11,11 @@ import ui
 
 pyautogui.PAUSE = 0
 
+def _fmt_secs(s):
+    if s >= 60 and s % 60 == 0:
+        return f"{s // 60}min"
+    return f"{s}s"
+
 X, Y = 1200, 815
 INTERVAL = 0.2
 RESTART_INTERVAL = 1500
@@ -66,7 +71,7 @@ def do_restart():
 
 keyboard.add_hotkey('ctrl+.', toggle_pause)
 
-print(f"连点器启动: ({X}, {Y}), 间隔 {INTERVAL}s, 重启间隔 {RESTART_INTERVAL}s")
+print(f"连点器启动: ({X}, {Y}), 间隔 {INTERVAL}s, 重启间隔 {_fmt_secs(RESTART_INTERVAL)}")
 print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 
 do_restart()
@@ -79,7 +84,7 @@ try:
                 dy = random.randint(-5, 5)
                 pyautogui.click(X + dx, Y + dy)
             time.sleep(INTERVAL)
-        print(f"[{time.strftime('%H:%M:%S')}] 已满 {RESTART_INTERVAL}s，执行重启")
+        print(f"[{time.strftime('%H:%M:%S')}] 已满 {_fmt_secs(RESTART_INTERVAL)}，执行重启")
         do_restart()
 except KeyboardInterrupt:
     print("\n已停止")
