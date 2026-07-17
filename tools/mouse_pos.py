@@ -65,4 +65,7 @@ class MouseTracker:
 
 if __name__ == "__main__":
     app = MouseTracker()
-    app.run()
+    try:
+        app.run()
+    except KeyboardInterrupt:
+        pass
