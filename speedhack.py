@@ -4,10 +4,13 @@ import time
 import subprocess
 import csv
 import re
+import sys
 import pytesseract
 import mss
 import cv2
 import numpy as np
+
+DEBUG = '--debug' in sys.argv
 
 _CE_PROC = 'cheatengine-x86_64-SSE4-AVX2.exe'
 
@@ -24,6 +27,8 @@ def kill_ce():
         subprocess.run(['taskkill', '/F', '/IM', _CE_PROC],
                         capture_output=True, encoding='gbk')
         time.sleep(2)
+        if DEBUG:
+            print("  CE进程已关闭")
 
 
 def speedhack():
@@ -32,10 +37,9 @@ def speedhack():
         ['tasklist', '/FI', 'IMAGENAME eq firefox.exe', '/FO', 'CSV', '/NH'],
         encoding='gbk'
     )
+    rows = [r for r in csv.reader(output.strip().splitlines()) if len(r) >= 5]
     best_pid, best_mem = None, 0
-    for row in csv.reader(output.strip().splitlines()):
-        if len(row) < 5:
-            continue
+    for row in rows:
         pid = int(row[1])
         mem = int(row[4].replace(' K', '').replace(',', ''))
         if mem > best_mem:
@@ -44,14 +48,22 @@ def speedhack():
         raise RuntimeError("未找到firefox进程")
     pid16 = f"{best_pid:08X}"
     print(f"firefox PID={best_pid}, hex={pid16}")
+    if DEBUG:
+        print(f"  共 {len(rows)} 个firefox进程, 最大内存={best_mem}K")
 
     # 步骤2: 启动CE
+    if DEBUG:
+        print("  [步骤2] 启动CE...")
     pyautogui.click(950, 1050)
     time.sleep(3)
     if not is_ce_running():
         raise RuntimeError("CE启动失败，进程未运行")
+    if DEBUG:
+        print("  CE进程已运行")
 
     # 步骤3: 打开进程选择窗口
+    if DEBUG:
+        print("  [步骤3] 打开进程选择窗口")
     pyautogui.click(580, 235)
     time.sleep(1)
 
@@ -102,9 +114,12 @@ def speedhack():
         if best_match and best_diffs == 0:
             cy = best_match['y'] + best_match['h'] // 2
             click_y = proc_region["top"] + cy // 2
-            print(f"  匹配PID(差异{best_diffs}字符), 点击 y={click_y}")
+            if DEBUG:
+                print(f"  匹配PID(差异{best_diffs}字符), 点击 y={click_y}")
             pyautogui.click(880, click_y)
             return True
+        if DEBUG and best_match:
+            print(f"  最佳匹配差异{best_diffs}字符, 未达精确匹配")
         return False
 
     # 先连按3次page down到最底部
@@ -114,11 +129,13 @@ def speedhack():
 
     found = False
     for attempt in range(5):
-        print(f"  第{attempt+1}次 pageup + OCR...")
+        if DEBUG:
+            print(f"  第{attempt+1}次 pageup + OCR...")
         pyautogui.press('pageup')
         time.sleep(1)
         lines = ocr_lines()
-        print(f"  OCR行数: {len(lines)}")
+        if DEBUG:
+            print(f"  OCR行数: {len(lines)}")
         if find_and_click(lines):
             found = True
             break
@@ -129,14 +146,20 @@ def speedhack():
     time.sleep(1)
 
     # 步骤5: 点击Open
+    if DEBUG:
+        print("  [步骤5] Open")
     pyautogui.click(895, 760)
     time.sleep(1)
 
     # 步骤6: Enable Speedhack
+    if DEBUG:
+        print("  [步骤6] Enable Speedhack")
     pyautogui.click(1200, 500)
     time.sleep(1)
 
     # 步骤7: 输入倍速5
+    if DEBUG:
+        print("  [步骤7] 输入倍速5")
     pyautogui.click(1275, 525)
     time.sleep(0.3)
     keyboard.press_and_release('ctrl+a')
@@ -147,10 +170,14 @@ def speedhack():
     time.sleep(1)
 
     # 步骤8: Apply
+    if DEBUG:
+        print("  [步骤8] Apply")
     pyautogui.moveTo(1280, 605)
     time.sleep(1)
     pyautogui.click(1280, 605)
 
     # 步骤9: firefox回到前台
+    if DEBUG:
+        print("  [步骤9] firefox前台")
     pyautogui.click(1800, 540)
     print("speedhack 已设置")
