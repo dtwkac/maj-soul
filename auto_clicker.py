@@ -34,6 +34,7 @@ def toggle_pause():
 def do_restart():
     winsound.PlaySound = lambda *a, **k: None
     try:
+        kill_ce()
         relaunch.RESTART_COUNT += 1
         relaunch.LAST_RESTART = time.strftime('%H:%M:%S')
         print(f"[{relaunch.LAST_RESTART}] 触发重启")
@@ -79,7 +80,6 @@ try:
             dt = random.randint(-50, 50) / 1000
             time.sleep(INTERVAL + dt)
         print(f"[{time.strftime('%H:%M:%S')}] 已满 {RESTART_INTERVAL}s，执行重启")
-        kill_ce()
         do_restart()
 except KeyboardInterrupt:
     print("\n已停止")
