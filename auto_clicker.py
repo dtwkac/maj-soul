@@ -95,7 +95,7 @@ try:
             dy = random.randint(-5, 5)
             pyautogui.click(X + dx, Y + dy)
         now = time.time()
-        if now - last_detect >= DETECT_INTERVAL:
+        if not paused and now - last_detect >= DETECT_INTERVAL:
             last_detect = now
             val = detect_value()
             if DEBUG:
