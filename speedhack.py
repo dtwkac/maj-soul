@@ -108,7 +108,6 @@ def speedhack():
         return False
 
     # 先连按3次page down到最底部
-    print("  page down x3...")
     for _ in range(3):
         pyautogui.press('pagedown')
         time.sleep(0.5)
@@ -148,6 +147,8 @@ def speedhack():
     time.sleep(1)
 
     # 步骤8: Apply
+    pyautogui.moveTo(1280, 605)
+    time.sleep(1)
     pyautogui.click(1280, 605)
 
     # 步骤9: firefox回到前台

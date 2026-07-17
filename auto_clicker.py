@@ -57,8 +57,9 @@ def do_restart():
             ui.alarm("重启失败: 先决条件超限")
             return
         print(f"[{time.strftime('%H:%M:%S')}] 重启完成，继续连点")
-        speedhack()
         pyautogui.moveTo(*CENTER)
+        time.sleep(1)
+        speedhack()
         time.sleep(1)
     finally:
         winsound.PlaySound = _orig_play
