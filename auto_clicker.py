@@ -6,7 +6,7 @@ import relaunch
 import winsound
 import cv2
 from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER
-from speedhack import speedhack
+from speedhack import speedhack, kill_ce
 import ui
 
 pyautogui.PAUSE = 0
@@ -79,6 +79,7 @@ try:
             dt = random.randint(-50, 50) / 1000
             time.sleep(INTERVAL + dt)
         print(f"[{time.strftime('%H:%M:%S')}] 已满 {RESTART_INTERVAL}s，执行重启")
+        kill_ce()
         do_restart()
 except KeyboardInterrupt:
     print("\n已停止")

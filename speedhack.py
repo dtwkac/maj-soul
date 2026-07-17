@@ -9,6 +9,21 @@ import mss
 import cv2
 import numpy as np
 
+_CE_PROC = 'cheatengine-x86_64-SSE4.exe'
+
+def is_ce_running():
+    out = subprocess.check_output(
+        ['tasklist', '/FI', f'IMAGENAME eq {_CE_PROC}', '/FO', 'CSV', '/NH'],
+        encoding='gbk'
+    )
+    return bool(out.strip())
+
+def kill_ce():
+    if is_ce_running():
+        print("关闭已有CE进程")
+        subprocess.run(['taskkill', '/F', '/IM', _CE_PROC],
+                        capture_output=True, encoding='gbk')
+
 
 def speedhack():
     # 步骤1: 获取firefox最大内存占用pid并转8位hex
@@ -32,6 +47,8 @@ def speedhack():
     # 步骤2: 启动CE
     pyautogui.click(950, 1050)
     time.sleep(3)
+    if not is_ce_running():
+        raise RuntimeError("CE启动失败，进程未运行")
 
     # 步骤3: 打开进程选择窗口
     pyautogui.click(580, 235)
