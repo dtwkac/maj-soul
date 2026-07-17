@@ -9,20 +9,21 @@ import mss
 import cv2
 import numpy as np
 
-_CE_PROC = 'cheatengine-x86_64-SSE4.exe'
+_CE_PROC = 'cheatengine-x86_64-SSE4-AVX2.exe'
 
 def is_ce_running():
     out = subprocess.check_output(
         ['tasklist', '/FI', f'IMAGENAME eq {_CE_PROC}', '/FO', 'CSV', '/NH'],
         encoding='gbk'
     )
-    return bool(out.strip())
+    return _CE_PROC.lower() in out.lower()
 
 def kill_ce():
     if is_ce_running():
         print("关闭已有CE进程")
         subprocess.run(['taskkill', '/F', '/IM', _CE_PROC],
                         capture_output=True, encoding='gbk')
+        time.sleep(2)
 
 
 def speedhack():
