@@ -36,6 +36,9 @@ uv sync
 
 手动安装 Tesseract-OCR：
 https://github.com/UB-Mannheim/tesseract/releases
+7-Zip解压后重命名为 Tesseract-OCR
+
+Cheat Engine 放置于项目目录下 `Cheat Engine/` 文件夹
 
 ## 使用
 

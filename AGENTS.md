@@ -71,4 +71,4 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 ### speedhack 流程
 - `do_restart()` 内重启完成后依次执行：`moveTo(CENTER)` → `speedhack()`
 - `speedhack()` 启动前调用 `kill_ce()` 关闭已有 CE 进程（进程名 `cheatengine-x86_64-SSE4-AVX2.exe`）
-- 步骤：tasklist 获取最大内存 firefox PID → 转8位hex → 启动CE（检测进程是否运行） → OCR识别进程列表（截屏区域 left=827） → 逐字符比对pid16精确匹配（无容差） → 页翻找（pagedown×3到底，pageup最多5次） → 点击Open → Enable Speedhack → Ctrl+A全选+Backspace清除+输入5 → 悬停1s → Apply → firefox回前台
+- 步骤：tasklist 获取最大内存 firefox PID → 转8位hex → 命令行启动CE（`Cheat Engine.exe`，检测实际进程是否运行） → OCR识别进程列表（截屏区域 left=827） → 逐字符比对pid16精确匹配（无容差） → 页翻找（pagedown×3到底，pageup最多5次） → 点击Open → Enable Speedhack → Ctrl+A全选+Backspace清除+输入5 → 悬停1s → Apply → firefox回前台

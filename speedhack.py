@@ -4,6 +4,7 @@ import time
 import subprocess
 import csv
 import re
+import os
 import sys
 import pytesseract
 import mss
@@ -13,6 +14,8 @@ import numpy as np
 DEBUG = '--debug' in sys.argv
 
 _CE_PROC = 'cheatengine-x86_64-SSE4-AVX2.exe'
+_CE_DIR = r'D:\workspace\maj-soul\Cheat Engine'
+_CE_EXE = os.path.join(_CE_DIR, 'Cheat Engine.exe')
 
 def is_ce_running():
     out = subprocess.check_output(
@@ -54,7 +57,7 @@ def speedhack():
     # 步骤2: 启动CE
     if DEBUG:
         print("  [步骤2] 启动CE...")
-    pyautogui.click(950, 1050)
+    subprocess.Popen([_CE_EXE])
     time.sleep(3)
     if not is_ce_running():
         raise RuntimeError("CE启动失败，进程未运行")
