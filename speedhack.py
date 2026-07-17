@@ -123,9 +123,9 @@ def speedhack():
             found = True
             break
     if not found:
-        print(f"[!] 未找到进程 {pid16}-firefox.exe，等待手动关闭CE...")
-        while True:
-            time.sleep(1)
+        print(f"[!] 未找到进程 {pid16}-firefox.exe，关闭CE并退出")
+        kill_ce()
+        raise SystemExit(1)
     time.sleep(1)
 
     # 步骤5: 点击Open
