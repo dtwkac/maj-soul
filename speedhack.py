@@ -132,10 +132,11 @@ def speedhack():
 
     found = False
     for attempt in range(5):
+        if attempt > 0:
+            pyautogui.press('pageup')
+        time.sleep(2)
         if DEBUG:
-            print(f"  第{attempt+1}次 pageup + OCR...")
-        pyautogui.press('pageup')
-        time.sleep(1)
+            print(f"  第{attempt+1}次 OCR...")
         lines = ocr_lines()
         if DEBUG:
             print(f"  OCR行数: {len(lines)}")

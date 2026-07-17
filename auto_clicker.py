@@ -19,8 +19,8 @@ DEBUG = '--debug' in sys.argv
 
 X, Y = 1200, 815
 INTERVAL = 0.2
-DETECT_INTERVAL = 5
-_DETECT_REGION = {"left": 1637, "top": 170, "width": 93, "height": 67}
+DETECT_INTERVAL = 15
+_DETECT_REGION = {"left": 1468, "top": 627, "width": 32, "height": 55}
 PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND_TEMPLATE2 = cv2.imread('pics/pre2.png', cv2.IMREAD_GRAYSCALE)
@@ -42,8 +42,9 @@ def toggle_pause():
 def detect_value():
     img = np.asarray(_sct.grab(_DETECT_REGION))
     gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
-    _, gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    text = pytesseract.image_to_string(gray, config='--psm 7 -c tessedit_char_whitelist=0123456789').strip()
+    big = cv2.resize(gray, None, fx=8, fy=8, interpolation=cv2.INTER_CUBIC)
+    _, bw = cv2.threshold(big, 180, 255, cv2.THRESH_BINARY)
+    text = pytesseract.image_to_string(bw, config='--psm 7 -c tessedit_char_whitelist=0123456789').strip()
     return text if text else None
 
 def do_restart():
