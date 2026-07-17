@@ -104,10 +104,10 @@ try:
                 print(f"  检测值: {val}")
             if val == prev_value:
                 same_count += 1
-                if same_count == 2:
-                    print(f"[{time.strftime('%H:%M:%S')}] 检测值连续相同({val})，连续 {same_count} 次")
+                if same_count >= 2 and DEBUG:
+                    print(f"  检测值连续相同({val})，连续 {same_count} 次")
                 elif same_count >= 5:
-                    print(f"[{time.strftime('%H:%M:%S')}] 检测值连续相同({val})，执行重启")
+                    print(f"[{time.strftime('%H:%M:%S')}] 连续5次相同({val})，执行重启")
                     do_restart()
                     prev_value = None
                     same_count = 0
