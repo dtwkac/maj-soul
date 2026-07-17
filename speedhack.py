@@ -134,14 +134,19 @@ def speedhack():
     for attempt in range(5):
         if attempt > 0:
             pyautogui.press('pageup')
-        time.sleep(2)
-        if DEBUG:
-            print(f"  第{attempt+1}次 OCR...")
-        lines = ocr_lines()
-        if DEBUG:
-            print(f"  OCR行数: {len(lines)}")
-        if find_and_click(lines):
-            found = True
+        time.sleep(1)
+        for retry in range(3):
+            if retry > 0:
+                time.sleep(1)
+            if DEBUG:
+                print(f"  第{attempt+1}页 第{retry+1}次 OCR...")
+            lines = ocr_lines()
+            if DEBUG:
+                print(f"  OCR行数: {len(lines)}")
+            if find_and_click(lines):
+                found = True
+                break
+        if found:
             break
     if not found:
         print(f"[!] 未找到进程 {pid16}-firefox.exe，关闭CE并退出")
