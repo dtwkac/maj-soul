@@ -113,7 +113,7 @@ def speedhack():
         time.sleep(0.5)
 
     found = False
-    for attempt in range(10):
+    for attempt in range(5):
         print(f"  第{attempt+1}次 pageup + OCR...")
         pyautogui.press('pageup')
         time.sleep(1)
