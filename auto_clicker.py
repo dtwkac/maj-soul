@@ -19,7 +19,7 @@ DEBUG = '--debug' in sys.argv
 
 X, Y = 1200, 815
 INTERVAL = 0.2
-DETECT_INTERVAL = 15
+DETECT_INTERVAL = 5
 _DETECT_REGION = {"left": 1468, "top": 627, "width": 32, "height": 55}
 PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
@@ -88,6 +88,7 @@ print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 do_restart()
 
 prev_value = None
+same_count = 0
 try:
     last_detect = 0
     while True:
@@ -101,12 +102,18 @@ try:
             val = detect_value()
             if DEBUG:
                 print(f"  检测值: {val}")
-            if val is not None and val == prev_value:
-                print(f"[{time.strftime('%H:%M:%S')}] 检测值连续相同({val})，执行重启")
-                do_restart()
-                prev_value = None
+            if val == prev_value:
+                same_count += 1
+                if same_count == 2:
+                    print(f"[{time.strftime('%H:%M:%S')}] 检测值连续相同({val})，连续 {same_count} 次")
+                elif same_count >= 5:
+                    print(f"[{time.strftime('%H:%M:%S')}] 检测值连续相同({val})，执行重启")
+                    do_restart()
+                    prev_value = None
+                    same_count = 0
             else:
                 prev_value = val
+                same_count = 0
         time.sleep(INTERVAL)
 except KeyboardInterrupt:
     print("\n已停止")
