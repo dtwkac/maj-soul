@@ -6,13 +6,14 @@ import relaunch
 import winsound
 import cv2
 from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER
+from speedhack import speedhack
 import ui
 
 pyautogui.PAUSE = 0
 
 X, Y = 1200, 815
 INTERVAL = 0.2
-RESTART_INTERVAL = 3600
+RESTART_INTERVAL = 1800
 TILE_REGION = (1385, 885, 90, 140)
 PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
@@ -55,6 +56,7 @@ def do_restart():
             ui.alarm("重启失败: 先决条件超限")
             return
         print(f"[{time.strftime('%H:%M:%S')}] 重启完成，继续连点")
+        speedhack()
         pyautogui.moveTo(*CENTER)
         time.sleep(1)
     finally:

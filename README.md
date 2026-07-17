@@ -73,6 +73,7 @@ ui.py                  # 用户交互（报警、暂停弹窗、debug 窗口）
 tsumo19d.py            # 入口，主循环（仅自摸1/9序数牌和dong）
 zi.py                  # 字牌自摸/跳过（匹配 pics/zi* 则跳过，否则自摸）
 auto_clicker.py        # 连点器（自动定时重启，含先决条件判定）
+speedhack.py           # CE加速模块（自动打开CE，OCR匹配firefox PID，设置5倍速）
 cloud_bottle.py        # 刷印章连点器（w 键暂停/恢复，暂停时悬停自摸坐标）
 pics/
 ├── targets/          # 目标牌模板（触发自摸）
