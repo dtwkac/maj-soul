@@ -17,7 +17,7 @@ pyautogui.PAUSE = 0
 
 DEBUG = '--debug' in sys.argv
 
-X, Y = 1200, 815
+TSUMO_BTN = (1200, 815)
 INTERVAL = 0.2
 DETECT_INTERVAL = 5
 _DETECT_REGION = {"left": 1470, "top": 630, "width": 30, "height": 12}
@@ -88,7 +88,7 @@ def restart_with_speedhack():
 keyboard.add_hotkey('ctrl+.', toggle_pause)
 
 if DEBUG:
-    print(f"连点器启动: ({X}, {Y}), 点击间隔 {INTERVAL}s, 回合数卡住检测间隔 {DETECT_INTERVAL}s")
+    print(f"连点器启动: {TSUMO_BTN}, 点击间隔 {INTERVAL}s, 回合数卡住检测间隔 {DETECT_INTERVAL}s")
 print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 
 restart_with_speedhack()
@@ -103,7 +103,7 @@ try:
         if not paused:
             dx = random.randint(-5, 5)
             dy = random.randint(-5, 5)
-            pyautogui.click(X + dx, Y + dy)
+            pyautogui.click(TSUMO_BTN[0] + dx, TSUMO_BTN[1] + dy)
         now = time.time()
         if not paused and now - last_detect >= DETECT_INTERVAL:
             last_detect = now
