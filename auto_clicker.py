@@ -121,7 +121,7 @@ try:
                         check_count = 0
                     if DEBUG:
                         print(f"  检测值连续相同({val})，连续 {same_count} 次，check连续 {check_count} 次(匹配度{max_val:.3f})")
-                    if check_count >= 5:
+                    if check_count >= 3:
                         print(f"[{time.strftime('%H:%M:%S')}] 连续5次check确认卡住({val})，执行重启")
                         restart_with_speedhack()
                         prev_value = None
