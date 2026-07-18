@@ -38,7 +38,7 @@ paused = False
 def toggle_pause():
     global paused
     paused = not paused
-    print("已暂停" if paused else "继续运行")
+    print(f"[{time.strftime('%H:%M:%S')}] 已暂停" if paused else f"[{time.strftime('%H:%M:%S')}] 继续运行")
 
 def detect_value():
     img = np.asarray(_sct.grab(_DETECT_REGION))
@@ -136,4 +136,4 @@ try:
             prev_check = curr_check
         time.sleep(INTERVAL)
 except KeyboardInterrupt:
-    print("\n已停止")
+    print(f"[{time.strftime('%H:%M:%S')}] 已停止")

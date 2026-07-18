@@ -64,7 +64,7 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `ui.alarm`: 5 × Beep(660Hz, 200ms) + PlaySound("SystemExclamation")，消息框确定继续/取消退出；所有报警均含 `ALARM_TIMEOUT` 秒超时自动关闭游戏窗口（1890, 27 停留1s后点击）并退出
 - 重试只由先决条件控制：不满足则跳过本轮；牌面识别无重试
 - `--debug` 可选：开启 Tkinter 调试窗口（`ui.setup_debug_window`，右下角固定，260×280，Consolas bold），判决后点击前更新实时信息（已运行时间/重启次数/上次重启/先决分数/OCR分数/牌面识别结果）
-- 常规日志仅保留时间戳标注的关键事件：卡住确认（先决条件前的悬停重连）、网络断连匹配、重连触发流程、重连完成；其余诊断信息（牌面匹配特征、OCR 重试详情、匹配进度、分隔线等）均仅在 DEBUG 模式输出
+- 常规日志仅保留时间戳标注的关键事件：卡住确认、网络断连匹配、重连触发流程、重连完成、speedhack设置；其余诊断信息（firefox PID/CE进程关闭、牌面匹配特征、OCR 重试详情、匹配进度、分隔线等）均仅在 DEBUG 模式输出
 - `Tesseract-OCR/`（已在 .gitignore）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
 
