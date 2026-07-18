@@ -9,7 +9,7 @@ import cv2
 import mss
 import numpy as np
 import pytesseract
-from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER, PRECONDITION_THRESHOLD
+from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER
 from speedhack import speedhack, kill_ce
 import ui
 
@@ -25,6 +25,7 @@ PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND_TEMPLATE2 = cv2.imread('pics/pre2.png', cv2.IMREAD_GRAYSCALE)
 _CHECK_REGION = {"left": 830, "top": 450, "width": 195, "height": 150}
+SIMILARITY_THRESHOLD = 0.99
 
 _sct = mss.MSS()
 
@@ -118,7 +119,7 @@ try:
                 if same_count >= 2 and prev_check is not None:
                     result = cv2.matchTemplate(prev_check, curr_check, cv2.TM_CCOEFF_NORMED)
                     _, max_val, _, _ = cv2.minMaxLoc(result)
-                    if max_val >= PRECONDITION_THRESHOLD:
+                    if max_val >= SIMILARITY_THRESHOLD:
                         check_count += 1
                     else:
                         check_count = 0
