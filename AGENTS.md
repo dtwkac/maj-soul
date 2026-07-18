@@ -32,7 +32,7 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `ui.py` — 用户交互（报警、暂停弹窗、debug 窗口）
 - `tsumo19d.py` — 入口，主循环（仅自摸1/9序数牌和dong）
 - `zi.py` — 字牌自摸/跳过（匹配 pics/zi* 则跳过，否则自摸）
-- `auto_clicker.py` — 连点器（OCR检测卡住触发重启，5s间隔，连续5次相同(含None)触发重启，失败自动重试，含先决条件判定）
+- `auto_clicker.py` — 连点器（OCR检测卡住触发重启，5s间隔，连续5次check确认卡住后重启，失败自动重试，含先决条件判定）
 - `speedhack.py` — CE加速模块（自动打开CE，OCR精确匹配firefox PID，设置5倍速；返回bool，含CE进程检测/关闭）
 - `cloud_bottle.py` — 刷印章连点器（w 键暂停/恢复，暂停时悬停自摸坐标）
 - `tools/mouse_pos.py` — 获取屏幕坐标的辅助工具（Tkinter 悬浮窗）
@@ -67,6 +67,13 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - 常规日志仅保留时间戳标注的关键事件：卡住确认（先决条件前的悬停重连）、网络断连匹配、重连触发流程、重连完成；其余诊断信息（牌面匹配特征、OCR 重试详情、匹配进度、分隔线等）均仅在 DEBUG 模式输出
 - `Tesseract-OCR/`（已在 .gitignore）
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
+
+### auto_clicker 卡住检测
+- 每轮截取 `_CHECK_REGION`(830,450)-(1025,600) 灰度图
+- OCR值连续2次相同时，比较本轮与上一轮check区域匹配度（TM_CCOEFF_NORMED）
+- 匹配度≥`PRECONDITION_THRESHOLD`(0.9) → check_count+1，否则归零
+- check_count连续≥5 → 确认卡住，执行重启
+- OCR值变化时全部归零
 
 ### speedhack 流程
 - `restart_with_speedhack()` 封装循环：`do_restart()` 失败持续重试，成功后调用 `speedhack()`，失败则重新 `do_restart()`

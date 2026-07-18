@@ -9,7 +9,7 @@ import cv2
 import mss
 import numpy as np
 import pytesseract
-from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER
+from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER, PRECONDITION_THRESHOLD
 from speedhack import speedhack, kill_ce
 import ui
 
@@ -24,6 +24,7 @@ _DETECT_REGION = {"left": 1468, "top": 627, "width": 32, "height": 55}
 PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND_TEMPLATE2 = cv2.imread('pics/pre2.png', cv2.IMREAD_GRAYSCALE)
+_CHECK_REGION = {"left": 830, "top": 450, "width": 195, "height": 150}
 
 _sct = mss.MSS()
 
@@ -92,7 +93,9 @@ print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 restart_with_speedhack()
 
 prev_value = None
+prev_check = None
 same_count = 0
+check_count = 0
 try:
     last_detect = 0
     while True:
@@ -104,20 +107,32 @@ try:
         if not paused and now - last_detect >= DETECT_INTERVAL:
             last_detect = now
             val = detect_value()
+            curr_check = cv2.cvtColor(np.asarray(_sct.grab(_CHECK_REGION)), cv2.COLOR_BGRA2GRAY)
             if DEBUG:
                 print(f"  检测值: {val}")
             if val == prev_value:
                 same_count += 1
-                if same_count >= 2 and DEBUG:
-                    print(f"  检测值连续相同({val})，连续 {same_count} 次")
-                if same_count >= 5:
-                    print(f"[{time.strftime('%H:%M:%S')}] 连续5次相同({val})，执行重启")
-                    restart_with_speedhack()
-                    prev_value = None
-                    same_count = 0
+                if same_count >= 2 and prev_check is not None:
+                    result = cv2.matchTemplate(prev_check, curr_check, cv2.TM_CCOEFF_NORMED)
+                    _, max_val, _, _ = cv2.minMaxLoc(result)
+                    if max_val >= PRECONDITION_THRESHOLD:
+                        check_count += 1
+                    else:
+                        check_count = 0
+                    if DEBUG:
+                        print(f"  检测值连续相同({val})，连续 {same_count} 次，check连续 {check_count} 次(匹配度{max_val:.3f})")
+                    if check_count >= 5:
+                        print(f"[{time.strftime('%H:%M:%S')}] 连续5次check确认卡住({val})，执行重启")
+                        restart_with_speedhack()
+                        prev_value = None
+                        prev_check = None
+                        same_count = 0
+                        check_count = 0
             else:
                 prev_value = val
                 same_count = 0
+                check_count = 0
+            prev_check = curr_check
         time.sleep(INTERVAL)
 except KeyboardInterrupt:
     print("\n已停止")
