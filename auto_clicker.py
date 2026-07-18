@@ -40,7 +40,7 @@ def toggle_pause():
     paused = not paused
     print(f"[{time.strftime('%H:%M:%S')}] 已暂停" if paused else f"[{time.strftime('%H:%M:%S')}] 继续运行")
 
-def detect_round_value():
+def detect_round():
     img = np.asarray(_sct.grab(_DETECT_REGION))
     gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
     big = cv2.resize(gray, None, fx=16, fy=16, interpolation=cv2.INTER_CUBIC)
@@ -97,7 +97,7 @@ restart_with_speedhack()
 
 prev_rounds = None
 prev_check = None
-same_count = 0
+same_count = 1
 check_count = 0
 try:
     last_detect = 0
@@ -109,13 +109,13 @@ try:
         now = time.time()
         if not paused and now - last_detect >= DETECT_INTERVAL:
             last_detect = now
-            rounds = detect_round_value()
+            rounds = detect_round()
             curr_check = cv2.cvtColor(np.asarray(_sct.grab(_CHECK_REGION)), cv2.COLOR_BGRA2GRAY)
             if DEBUG:
                 print(f"  回合数: {rounds}")
             if rounds == prev_rounds:
                 same_count += 1
-                if same_count >= 1 and prev_check is not None:
+                if same_count >= 2 and prev_check is not None:
                     result = cv2.matchTemplate(prev_check, curr_check, cv2.TM_CCOEFF_NORMED)
                     _, max_val, _, _ = cv2.minMaxLoc(result)
                     if max_val >= PRECONDITION_THRESHOLD:
@@ -123,9 +123,9 @@ try:
                     else:
                         check_count = 0
                     if DEBUG:
-                        print(f"  回合{rounds} 相同{same_count+1}次 check{check_count}/3 匹配度{max_val:.3f}")
+                        print(f"  回合数{rounds} 连续相同{same_count}次 check{check_count}/3 匹配度{max_val:.3f}")
                     if check_count >= 3:
-                        print(f"[{time.strftime('%H:%M:%S')}] 连续3次check确认卡住(回合{rounds})")
+                        print(f"[{time.strftime('%H:%M:%S')}] 连续3次check确认卡住(回合数{rounds})")
                         restart_with_speedhack()
                         prev_rounds = None
                         prev_check = None
@@ -133,7 +133,7 @@ try:
                         check_count = 0
             else:
                 prev_rounds = rounds
-                same_count = 0
+                same_count = 1
                 check_count = 0
             prev_check = curr_check
         time.sleep(INTERVAL)
