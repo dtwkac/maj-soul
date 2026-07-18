@@ -20,7 +20,7 @@ DEBUG = '--debug' in sys.argv
 X, Y = 1200, 815
 INTERVAL = 0.2
 DETECT_INTERVAL = 5
-_DETECT_REGION = {"left": 1468, "top": 627, "width": 32, "height": 55}
+_DETECT_REGION = {"left": 1470, "top": 630, "width": 30, "height": 12}
 PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND_TEMPLATE2 = cv2.imread('pics/pre2.png', cv2.IMREAD_GRAYSCALE)
@@ -92,7 +92,7 @@ print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 
 restart_with_speedhack()
 
-prev_value = None
+prev_rounds = None
 prev_check = None
 same_count = 0
 check_count = 0
@@ -106,11 +106,11 @@ try:
         now = time.time()
         if not paused and now - last_detect >= DETECT_INTERVAL:
             last_detect = now
-            val = detect_value()
+            rounds = detect_value()
             curr_check = cv2.cvtColor(np.asarray(_sct.grab(_CHECK_REGION)), cv2.COLOR_BGRA2GRAY)
             if DEBUG:
-                print(f"  检测值: {val}")
-            if val == prev_value:
+                print(f"  回合数: {rounds}")
+            if rounds == prev_rounds:
                 same_count += 1
                 if same_count >= 2 and prev_check is not None:
                     result = cv2.matchTemplate(prev_check, curr_check, cv2.TM_CCOEFF_NORMED)
@@ -120,16 +120,16 @@ try:
                     else:
                         check_count = 0
                     if DEBUG:
-                        print(f"  检测值连续相同({val})，连续 {same_count} 次，check连续 {check_count} 次(匹配度{max_val:.3f})")
+                        print(f"  回合{rounds} 相同{same_count}次 check{check_count}/3 匹配度{max_val:.3f}")
                     if check_count >= 3:
-                        print(f"[{time.strftime('%H:%M:%S')}] 连续5次check确认卡住({val})，执行重启")
+                        print(f"[{time.strftime('%H:%M:%S')}] 连续3次check确认卡住(回合{rounds})，执行重启")
                         restart_with_speedhack()
-                        prev_value = None
+                        prev_rounds = None
                         prev_check = None
                         same_count = 0
                         check_count = 0
             else:
-                prev_value = val
+                prev_rounds = rounds
                 same_count = 0
                 check_count = 0
             prev_check = curr_check
