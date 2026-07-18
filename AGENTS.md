@@ -69,7 +69,6 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
 
 ### speedhack 流程
-- `restart_with_speedhack()` 封装循环：`do_restart()` 失败持续重试，成功后调用 `speedhack()`，失败则重新 `do_restart()`
-- `do_restart()` 返回 bool：依次新建标签页、匹配 qyzz/continue/先决条件，失败打印日志返回 False，成功返回 True
-- `speedhack()` 返回 bool：启动前调用 `kill_ce()`（sleep 1s）关闭已有 CE 进程（进程名 `cheatengine-x86_64-SSE4-AVX2.exe`）
-- 步骤：tasklist 获取最大内存 firefox PID → 转8位hex → 命令行启动CE（`Cheat Engine.exe`，检测实际进程是否运行） → OCR识别进程列表（截屏区域 left=827） → 逐字符比对pid16精确匹配（无容差） → 页翻找（pagedown×3到底，pageup最多5次，每页重试2次，每次等待1s） → 点击Open → Enable Speedhack → Ctrl+A全选+Backspace清除+输入5 → 悬停1s → Apply → firefox回前台
+- `do_restart()` 内重启完成后依次执行：`moveTo(CENTER)` → `speedhack()`
+- `speedhack()` 启动前调用 `kill_ce()` 关闭已有 CE 进程（进程名 `cheatengine-x86_64-SSE4-AVX2.exe`）
+- 步骤：tasklist 获取最大内存 firefox PID → 转8位hex → 命令行启动CE（`Cheat Engine.exe`，检测实际进程是否运行） → OCR识别进程列表（截屏区域 left=827） → 逐字符比对pid16精确匹配（无容差） → 页翻找（pagedown×3到底，pageup最多5次，每次等待2s） → 点击Open → Enable Speedhack → Ctrl+A全选+Backspace清除+输入5 → 悬停1s → Apply → firefox回前台
