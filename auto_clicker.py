@@ -123,7 +123,7 @@ try:
                     if DEBUG:
                         print(f"  回合{rounds} 相同{same_count}次 check{check_count}/3 匹配度{max_val:.3f}")
                     if check_count >= 3:
-                        print(f"[{time.strftime('%H:%M:%S')}] 连续3次check确认卡住(回合{rounds})，执行重启")
+                        print(f"[{time.strftime('%H:%M:%S')}] 连续3次check确认卡住(回合{rounds})")
                         restart_with_speedhack()
                         prev_rounds = None
                         prev_check = None
