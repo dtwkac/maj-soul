@@ -63,29 +63,33 @@ def do_restart():
         pyautogui.click(85, 290)
         time.sleep(30)
         if not relaunch._wait_any(relaunch.RELAUNCH_QYZZ_REGION, [relaunch._QYZZ1, relaunch._QYZZ2], "qyzz", relaunch.RELAUNCH_QYZZ_CLICK):
-            ui.alarm("重启失败: qyzz 超限")
-            return
+            print(f"[{time.strftime('%H:%M:%S')}] 重启失败: qyzz 超限")
+            return False
         pyautogui.click(105, 25)
         if not relaunch._wait(RELAUNCH_CONTINUE_REGION, relaunch._CONTINUE, "continue", RELAUNCH_CONTINUE_CLICK):
-            ui.alarm("重启失败: continue 超限")
-            return
+            print(f"[{time.strftime('%H:%M:%S')}] 重启失败: continue 超限")
+            return False
         if not relaunch._wait_any(PRECOND_REGION, [_PRECOND_TEMPLATE1, _PRECOND_TEMPLATE2], "先决条件"):
-            ui.alarm("重启失败: 先决条件超限")
-            return
-        print(f"[{time.strftime('%H:%M:%S')}] 重启完成，继续连点")
+            print(f"[{time.strftime('%H:%M:%S')}] 重启失败: 先决条件超限")
+            return False
+        print(f"[{time.strftime('%H:%M:%S')}] 重启完成")
         pyautogui.moveTo(*CENTER)
-        time.sleep(1)
-        speedhack()
-        time.sleep(1)
+        return True
     finally:
         winsound.PlaySound = _orig_play
+
+def restart_with_speedhack():
+    while True:
+        if do_restart():
+            if speedhack():
+                break
 
 keyboard.add_hotkey('ctrl+.', toggle_pause)
 
 print(f"连点器启动: ({X}, {Y}), 间隔 {INTERVAL}s, 检测间隔 {DETECT_INTERVAL}s")
 print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 
-do_restart()
+restart_with_speedhack()
 
 prev_value = None
 same_count = 0
@@ -108,7 +112,7 @@ try:
                     print(f"  检测值连续相同({val})，连续 {same_count} 次")
                 if same_count >= 5:
                     print(f"[{time.strftime('%H:%M:%S')}] 连续5次相同({val})，执行重启")
-                    do_restart()
+                    restart_with_speedhack()
                     prev_value = None
                     same_count = 0
             else:
