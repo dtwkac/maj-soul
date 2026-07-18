@@ -32,8 +32,8 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `ui.py` — 用户交互（报警、暂停弹窗、debug 窗口）
 - `tsumo19d.py` — 入口，主循环（仅自摸1/9序数牌和dong）
 - `zi.py` — 字牌自摸/跳过（匹配 pics/zi* 则跳过，否则自摸）
-- `auto_clicker.py` — 连点器（OCR检测卡住触发重启，5s间隔，连续5次相同(含None)触发重启，含先决条件判定）
-- `speedhack.py` — CE加速模块（自动打开CE，OCR精确匹配firefox PID，设置5倍速；含CE进程检测/关闭）
+- `auto_clicker.py` — 连点器（OCR检测卡住触发重启，5s间隔，连续5次相同(含None)触发重启，失败自动重试，含先决条件判定）
+- `speedhack.py` — CE加速模块（自动打开CE，OCR精确匹配firefox PID，设置5倍速；返回bool，含CE进程检测/关闭）
 - `cloud_bottle.py` — 刷印章连点器（w 键暂停/恢复，暂停时悬停自摸坐标）
 - `tools/mouse_pos.py` — 获取屏幕坐标的辅助工具（Tkinter 悬浮窗）
 - `tools/threshold_test.py` — 阈值检测测试工具（Tkinter GUI）
@@ -58,7 +58,7 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - 启动弹窗（确定/取消），取消时 `os._exit(0)` 安全退出
 - 主循环无限运行，`try/except BaseException` 包裹，异常后打印堆栈并 `os._exit(1)` 安全退出
 - 每轮: 合并截屏(capture, 175×223) → 视图切片取牌面/分数 ROI → 卡住检测（与上轮截图比较，连续3次相同则悬停跳过按钮重截图，仍相同则播放10次警告音后触发重连(relaunch.run)；仅 DEBUG 打印重复次数） → 先决条件检测(tile_matcher.check_precondition, TM_CCOEFF_NORMED，不满足时重试） → ORB BFMatcher(best_match, 无重试一次出结果） → 网络断连检测（记录识别结果，连续5次相同时截图对比 net_reset.png；匹配则重连） → OCR 分数检测(score_reader.check_number） → 自摸/跳过
-- 重连模块 `relaunch.py`：`run()` 时打印 `[HH:MM:SS]` 时刻，模块级 `RESTART_COUNT` / `LAST_RESTART` 追踪；依次新建标签页、匹配 qyzz 画面（静音）、匹配 continue 画面、匹配先决条件；DEBUG 模式打印匹配进度和「警告音 x/10」。全部成功后继续主循环；任一步骤超限则回调 ui.alarm
+- 重连模块 `relaunch.py`：`run()` 时打印 `[HH:MM:SS]` 时刻，模块级 `RESTART_COUNT` / `LAST_RESTART` 追踪；依次新建标签页、匹配 qyzz 画面（静音）、匹配 continue 画面、匹配先决条件；DEBUG 模式打印匹配进度和「警告音 x/10」。全部成功后返回 True；任一步骤超限返回 False
 - ORB nfeatures=200，检测器与 BFMatcher 在模块级缓存（`tile_matcher._ORB` / `tile_matcher._BF`），每圈不重复构造
 - OCR 灰度图 8 倍放大 + 阈值180二值化后直出 Tesseract，PSM 7 + whitelist 0123456789/，分数大幅下降时连续两次一致即接受；诊断日志（不匹配详情/等待稳定）仅 DEBUG 打印
 - `ui.alarm`: 5 × Beep(660Hz, 200ms) + PlaySound("SystemExclamation")，消息框确定继续/取消退出；所有报警均含 `ALARM_TIMEOUT` 秒超时自动关闭游戏窗口（1890, 27 停留1s后点击）并退出
@@ -69,6 +69,7 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
 
 ### speedhack 流程
-- `do_restart()` 内重启完成后依次执行：`moveTo(CENTER)` → `speedhack()`
-- `speedhack()` 启动前调用 `kill_ce()` 关闭已有 CE 进程（进程名 `cheatengine-x86_64-SSE4-AVX2.exe`）
-- 步骤：tasklist 获取最大内存 firefox PID → 转8位hex → 命令行启动CE（`Cheat Engine.exe`，检测实际进程是否运行） → OCR识别进程列表（截屏区域 left=827） → 逐字符比对pid16精确匹配（无容差） → 页翻找（pagedown×3到底，pageup最多5次，每次等待2s） → 点击Open → Enable Speedhack → Ctrl+A全选+Backspace清除+输入5 → 悬停1s → Apply → firefox回前台
+- `restart_with_speedhack()` 封装循环：`do_restart()` 失败持续重试，成功后调用 `speedhack()`，失败则重新 `do_restart()`
+- `do_restart()` 返回 bool：依次新建标签页、匹配 qyzz/continue/先决条件，失败打印日志返回 False，成功返回 True
+- `speedhack()` 返回 bool：启动前调用 `kill_ce()`（sleep 1s）关闭已有 CE 进程（进程名 `cheatengine-x86_64-SSE4-AVX2.exe`）
+- 步骤：tasklist 获取最大内存 firefox PID → 转8位hex → 命令行启动CE（`Cheat Engine.exe`，检测实际进程是否运行） → OCR识别进程列表（截屏区域 left=827） → 逐字符比对pid16精确匹配（无容差） → 页翻找（pagedown×3到底，pageup最多5次，每页重试2次，每次等待1s） → 点击Open → Enable Speedhack → Ctrl+A全选+Backspace清除+输入5 → 悬停1s → Apply → firefox回前台

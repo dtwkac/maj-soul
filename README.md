@@ -75,8 +75,8 @@ relaunch.py            # 重连模块（卡住时刷新游戏并等待回归）
 ui.py                  # 用户交互（报警、暂停弹窗、debug 窗口）
 tsumo19d.py            # 入口，主循环（仅自摸1/9序数牌和dong）
 zi.py                  # 字牌自摸/跳过（匹配 pics/zi* 则跳过，否则自摸）
-auto_clicker.py        # 连点器（OCR检测卡住触发重启，5s间隔，连续5次相同触发重启，含先决条件判定）
-speedhack.py           # CE加速模块（自动打开CE，OCR匹配firefox PID，设置5倍速；含CE进程检测/关闭）
+auto_clicker.py        # 连点器（OCR检测卡住触发重启，5s间隔，连续5次相同触发重启，失败自动重试，含先决条件判定）
+speedhack.py           # CE加速模块（自动打开CE，OCR匹配firefox PID，设置5倍速；返回bool，含CE进程检测/关闭）
 cloud_bottle.py        # 刷印章连点器（w 键暂停/恢复，暂停时悬停自摸坐标）
 pics/
 ├── targets/          # 目标牌模板（触发自摸）
@@ -254,13 +254,13 @@ OCR 灰度图 3 倍放大后直出 Tesseract（PSM 7），分数大幅下降时�
 - 每轮对牌面 ROI 进行像素级比较（`np.array_equal`），连续 3 次相同时悬停跳过按钮重新截图比对，仍相同则播放 10 次警告音（每次间隔 1s），播放完成后触发重连（`relaunch.run`）
 - 卡住检测位于先决条件检测之前，确保始终运行不受先决条件控制流影响
 - 额外网络断连检测：ORB 识别结果连续 5 次相同时，截取 (645,405)–(1275,765) 区域与 `net_reset.png` 模板匹配（`TM_CCOEFF_NORMED`，阈值 0.9）；匹配则直接重连，不等待像素卡住
-- 重连流程依次新建标签页、匹配 qyzz 画面、匹配 continue 画面、匹配先决条件，全通过后继续主循环；任一步骤超限则回调 `ui.alarm` 报警
+- 重连流程依次新建标签页、匹配 qyzz 画面、匹配 continue 画面、匹配先决条件，全通过后返回 True；任一步骤超限返回 False，由 `restart_with_speedhack()` 自动重试
 
 ### 重连模块
-- `relaunch.py` 封装完整重连流程：新建标签页（365, 25）→ 收藏夹（40, 120）→ 网页（85, 290）→ 关闭旧标签（310, 30）→ 等待 30s → 匹配 qyzz 画面 → 点击 qyzz 按钮（静音 105, 25）→ 匹配 continue 画面 → 点击 continue 按钮 → 匹配先决条件 → 全部成功后继续主循环
+- `relaunch.py` 封装完整重连流程：新建标签页（365, 25）→ 收藏夹（40, 120）→ 网页（85, 290）→ 关闭旧标签（310, 30）→ 等待 30s → 匹配 qyzz 画面 → 点击 qyzz 按钮（静音 105, 25）→ 匹配 continue 画面 → 点击 continue 按钮 → 匹配先决条件 → 全部成功后返回 True
 - 每个匹配步骤使用 `cv2.matchTemplate(TM_CCOEFF_NORMED)`，阈值 0.9，重试上限 5 次，间隔 10s
 - `relaunch.run()` 先播放 10 次警告音（每次间隔 1s），再执行新建标签页等重连操作（区别于报警音）
-- 任一步骤超限则回调 `ui.alarm` 报警
+- 任一步骤超限则返回 False，由 `restart_with_speedhack()` 自动重试
 
 ### 模板目录
 - `pics/targets/` — 目标牌模板（触发自摸）
