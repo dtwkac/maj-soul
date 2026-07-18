@@ -26,7 +26,8 @@ def is_ce_running():
 
 def kill_ce():
     if is_ce_running():
-        print("关闭已有CE进程")
+        if DEBUG:
+            print("  关闭已有CE进程")
         subprocess.run(['taskkill', '/F', '/IM', _CE_PROC],
                         capture_output=True, encoding='gbk')
         time.sleep(1)
@@ -51,8 +52,8 @@ def speedhack():
         print("[!] 未找到firefox进程")
         return False
     pid16 = f"{best_pid:08X}"
-    print(f"firefox PID={best_pid}, hex={pid16}")
     if DEBUG:
+        print(f"  firefox PID={best_pid}, hex={pid16}")
         print(f"  共 {len(rows)} 个firefox进程, 最大内存={best_mem}K")
 
     # 步骤2: 启动CE
@@ -194,5 +195,6 @@ def speedhack():
     pyautogui.moveTo(1800, 540)
     time.sleep(1)
     pyautogui.click(1800, 540)
-    print("speedhack 已设置")
+    print(f"[{time.strftime('%H:%M:%S')}] speedhack 已设置")
+    print('-' * 80)
     return True

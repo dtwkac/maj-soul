@@ -87,7 +87,8 @@ def restart_with_speedhack():
 
 keyboard.add_hotkey('ctrl+.', toggle_pause)
 
-print(f"连点器启动: ({X}, {Y}), 间隔 {INTERVAL}s, 检测间隔 {DETECT_INTERVAL}s")
+if DEBUG:
+    print(f"连点器启动: ({X}, {Y}), 点击间隔 {INTERVAL}s, 回合数卡住检测间隔 {DETECT_INTERVAL}s")
 print("按 Ctrl+. 暂停/继续, Ctrl+C 退出")
 
 restart_with_speedhack()
