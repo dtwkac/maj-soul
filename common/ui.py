@@ -5,7 +5,7 @@ import os
 import threading
 import tkinter as tk
 import pyautogui
-from consts import CENTER, ALARM_TIMEOUT
+from common.consts import CENTER, ALARM_TIMEOUT
 
 paused = False
 START_TIME = None

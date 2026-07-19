@@ -1,6 +1,6 @@
 import numpy as np
 import mss
-from consts import TILE_REGION, NUM_REGION
+from common.consts import TILE_REGION, NUM_REGION
 
 _SCT = mss.MSS()
 left = NUM_REGION[0]

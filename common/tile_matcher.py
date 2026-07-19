@@ -1,7 +1,7 @@
 import cv2
 import os
 import sys
-from consts import TARGET_DIR, DISTRACTOR_DIR, PRECONDITION_TEMPLATE
+from common.consts import TARGET_DIR, DISTRACTOR_DIR, PRECONDITION_TEMPLATE
 
 DEBUG = '--debug' in sys.argv
 

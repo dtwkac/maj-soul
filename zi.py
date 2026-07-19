@@ -1,3 +1,4 @@
+# 字牌自摸/跳过，通过"文房四宝"完成魂牌染色
 import time
 import cv2
 import numpy as np
@@ -9,8 +10,8 @@ import keyboard
 import sys
 import random
 
-import ui
-from consts import LOOP_SLEEP, SLEEP_INTERVAL, TSUMO_BTN as _TSUMO_BTN
+from common import ui
+from common.consts import LOOP_SLEEP, SLEEP_INTERVAL, TSUMO_BTN as _TSUMO_BTN
 
 DEBUG = '--debug' in sys.argv
 

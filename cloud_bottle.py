@@ -1,7 +1,8 @@
+# 刷印章连点器：按 w 开始/停止，手动控制摸牌，通过"云朵药水"精确添加印章
 import pyautogui
 import keyboard
 import time
-from consts import CENTER, TSUMO_BTN
+from common.consts import CENTER, TSUMO_BTN
 
 paused = True
 

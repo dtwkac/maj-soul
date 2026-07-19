@@ -2,7 +2,7 @@ import pyautogui
 import time
 import sys
 import random
-from consts import TSUMO_BTN, CENTER, SKIP_BTN, CLICK_TIMES
+from common.consts import TSUMO_BTN, CENTER, SKIP_BTN, CLICK_TIMES
 
 DEBUG = '--debug' in sys.argv
 

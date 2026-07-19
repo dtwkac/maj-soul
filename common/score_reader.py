@@ -5,9 +5,9 @@ import time
 import os
 import sys
 import shutil
-from consts import NUM_ALARM, RETRY_LIMIT, SLEEP_INTERVAL
-from capture import grab_combined
-import ui
+from common.consts import NUM_ALARM, RETRY_LIMIT, SLEEP_INTERVAL
+from common.capture import grab_combined
+from common import ui
 
 DEBUG = '--debug' in sys.argv
 

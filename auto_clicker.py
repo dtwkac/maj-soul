@@ -1,17 +1,18 @@
+# 无条件自摸连点器，OCR检测卡住自动重启+CE加速
 import pyautogui
 import keyboard
 import time
 import random
 import sys
-import relaunch
+from common import relaunch
 import winsound
 import cv2
 import mss
 import numpy as np
 import pytesseract
-from consts import RELAUNCH_CONTINUE_REGION, CENTER, TSUMO_BTN
-from speedhack import speedhack, kill_ce
-import ui
+from common.consts import RELAUNCH_CONTINUE_REGION, CENTER, TSUMO_BTN
+from common.speedhack import speedhack, kill_ce
+from common import ui
 
 pyautogui.PAUSE = 0
 
