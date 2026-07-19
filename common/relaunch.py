@@ -6,7 +6,7 @@ import pyautogui
 import winsound
 import sys
 from common import ui
-from common.consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_INTERVAL
+from common.consts import RETRY_LIMIT, RELAUNCH_THRESHOLD
 
 DEBUG = '--debug' in sys.argv
 from common.consts import RELAUNCH_DIR, RELAUNCH_QYZZ_REGION
@@ -32,6 +32,7 @@ def _match(region, template):
     return float(score), center
 
 def _wait(region, template, label, click_pos=None):
+    # 外层循环：检测匹配，若匹配则点击
     for attempt in range(1, RETRY_LIMIT + 1):
         score, center = _match(region, template)
         if DEBUG:
@@ -41,28 +42,29 @@ def _wait(region, template, label, click_pos=None):
                 pyautogui.click(*center)
                 if DEBUG:
                     print(f"  {label} 匹配，点击 {center}")
-            else:
-                if DEBUG:
-                    print(f"  {label} 匹配")
-            time.sleep(5)
-            if click_pos is not False:
-                while True:
+                # 内层循环：点击后等待画面变化，画面改变说明点击成功
+                for _ in range(RETRY_LIMIT):
                     s, c = _match(region, template)
                     if s < RELAUNCH_THRESHOLD:
-                        break
+                        return True
                     pyautogui.click(*c)
                     if DEBUG:
                         print(f"  {label} 画面未改变，再次点击 {c}")
-                    time.sleep(5)
+                    time.sleep(3)
+                return False
+            else:
+                if DEBUG:
+                    print(f"  {label} 匹配")
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
-                print(f"  等待 {RELAUNCH_INTERVAL}s 后重试...")
-            time.sleep(RELAUNCH_INTERVAL)
+                print(f"  等待 1s 后重试...")
+            time.sleep(1)
     print(f"  重连失败: {label} 匹配超限")
     return False
 
 def _wait_any(region, templates, label, click_pos=None):
+    # 外层循环：检测匹配，若匹配则点击
     for attempt in range(1, RETRY_LIMIT + 1):
         best_score = 0
         best_center = None
@@ -80,12 +82,9 @@ def _wait_any(region, templates, label, click_pos=None):
                 pyautogui.click(*best_center)
                 if DEBUG:
                     print(f"  {label} 匹配(模板{best_idx+1})，点击 {best_center}")
-            else:
-                if DEBUG:
-                    print(f"  {label} 匹配(模板{best_idx+1})")
-            time.sleep(5)
-            if click_pos is not False:
-                while True:
+                time.sleep(3)
+                # 内层循环：点击后等待画面变化，画面改变说明点击成功
+                for _ in range(RETRY_LIMIT):
                     still_match = False
                     for tmpl in templates:
                         s, _ = _match(region, tmpl)
@@ -93,16 +92,20 @@ def _wait_any(region, templates, label, click_pos=None):
                             still_match = True
                             break
                     if not still_match:
-                        break
+                        return True
                     pyautogui.click(*best_center)
                     if DEBUG:
                         print(f"  {label} 画面未改变，再次点击 {best_center}")
-                    time.sleep(5)
+                    time.sleep(3)
+                return False
+            else:
+                if DEBUG:
+                    print(f"  {label} 匹配(模板{best_idx+1})")
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
-                print(f"  等待 {RELAUNCH_INTERVAL}s 后重试...")
-            time.sleep(RELAUNCH_INTERVAL)
+                print(f"  等待 1s 后重试...")
+            time.sleep(1)
     print(f"  重连失败: {label} 匹配超限")
     return False
 

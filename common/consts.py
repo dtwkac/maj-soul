@@ -14,7 +14,7 @@ SKIP_BTN = (500, 950)
 CLICK_TIMES = 72
 LOOP_SLEEP = 1.0
 SLEEP_INTERVAL = 0.2
-RETRY_LIMIT = 5
+RETRY_LIMIT = 10
 
 TARGET_DIR = r'D:\workspace\maj-soul\pics\targets'
 DISTRACTOR_DIR = r'D:\workspace\maj-soul\pics\distractors'
