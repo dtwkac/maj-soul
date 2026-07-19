@@ -39,6 +39,7 @@ def _wait(region, template, label, click_pos=None):
             print(f"  [{attempt}/{RETRY_LIMIT}] {label} 匹配度: {score:.3f}")
         if score >= RELAUNCH_THRESHOLD:
             if click_pos is not False:
+                pyautogui.moveTo(*center)
                 pyautogui.click(*center)
                 if DEBUG:
                     print(f"  {label} 匹配，点击 {center}")
@@ -47,6 +48,7 @@ def _wait(region, template, label, click_pos=None):
                     s, c = _match(region, template)
                     if s < RELAUNCH_THRESHOLD:
                         return True
+                    pyautogui.moveTo(*c)
                     pyautogui.click(*c)
                     if DEBUG:
                         print(f"  {label} 画面未改变，再次点击 {c}")
@@ -79,6 +81,7 @@ def _wait_any(region, templates, label, click_pos=None):
                 print(f"  [{attempt}/{RETRY_LIMIT}] {label}[{i+1}] 匹配度: {score:.3f}")
         if best_score >= RELAUNCH_THRESHOLD:
             if click_pos is not False:
+                pyautogui.moveTo(*best_center)
                 pyautogui.click(*best_center)
                 if DEBUG:
                     print(f"  {label} 匹配(模板{best_idx+1})，点击 {best_center}")
@@ -93,6 +96,7 @@ def _wait_any(region, templates, label, click_pos=None):
                             break
                     if not still_match:
                         return True
+                    pyautogui.moveTo(*best_center)
                     pyautogui.click(*best_center)
                     if DEBUG:
                         print(f"  {label} 画面未改变，再次点击 {best_center}")
@@ -120,18 +124,23 @@ def run():
         if DEBUG:
             print(f"警告音 {i+1}/10")
         time.sleep(1)
+    pyautogui.moveTo(365, 25)
     pyautogui.click(365, 25)      # 新建标签页
     time.sleep(1)
+    pyautogui.moveTo(310, 30)
     pyautogui.click(310, 30)      # 关闭旧标签页
     time.sleep(1)
+    pyautogui.moveTo(40, 120)
     pyautogui.click(40, 120)      # 收藏夹
     time.sleep(1)
+    pyautogui.moveTo(85, 290)
     pyautogui.click(85, 290)      # 网页
     time.sleep(30)
 
     if not _wait_any(RELAUNCH_QYZZ_REGION, [_QYZZ1, _QYZZ2], "qyzz", True):
         ui.alarm("重连失败: qyzz 匹配超限")
         return
+    pyautogui.moveTo(105, 25)
     pyautogui.click(105, 25)      # 静音
     time.sleep(1)
     if not _wait(RELAUNCH_CONTINUE_REGION, _CONTINUE, "continue", True):
