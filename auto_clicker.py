@@ -9,7 +9,7 @@ import cv2
 import mss
 import numpy as np
 import pytesseract
-from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER, TSUMO_BTN
+from consts import RELAUNCH_CONTINUE_REGION, CENTER, TSUMO_BTN
 from speedhack import speedhack, kill_ce
 import ui
 
@@ -29,7 +29,6 @@ SIMILARITY_THRESHOLD = 0.99
 _sct = mss.MSS()
 
 relaunch.RELAUNCH_QYZZ_REGION = (1635, 720, 110, 100)
-relaunch.RELAUNCH_QYZZ_CLICK = (1695, 775)
 
 _orig_play = winsound.PlaySound
 
@@ -65,11 +64,11 @@ def do_restart():
         time.sleep(1)
         pyautogui.click(85, 290)
         time.sleep(30)
-        if not relaunch._wait_any(relaunch.RELAUNCH_QYZZ_REGION, [relaunch._QYZZ1, relaunch._QYZZ2], "qyzz", relaunch.RELAUNCH_QYZZ_CLICK):
+        if not relaunch._wait_any(relaunch.RELAUNCH_QYZZ_REGION, [relaunch._QYZZ1, relaunch._QYZZ2], "qyzz"):
             print(f"[{time.strftime('%H:%M:%S')}] 重启失败: qyzz 超限")
             return False
         pyautogui.click(105, 25)
-        if not relaunch._wait(RELAUNCH_CONTINUE_REGION, relaunch._CONTINUE, "continue", RELAUNCH_CONTINUE_CLICK):
+        if not relaunch._wait(RELAUNCH_CONTINUE_REGION, relaunch._CONTINUE, "continue"):
             print(f"[{time.strftime('%H:%M:%S')}] 重启失败: continue 超限")
             return False
         if not relaunch._wait_any(PRECOND_REGION, [_PRECOND_TEMPLATE1, _PRECOND_TEMPLATE2], "先决条件"):

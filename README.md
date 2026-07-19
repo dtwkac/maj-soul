@@ -128,9 +128,7 @@ tools/
 | `TSUMO_BTN` | (1200, 815) | 自摸按钮 |
 | `SKIP_BTN` | (500, 950) | 跳过按钮 |
 | `RELAUNCH_QYZZ_REGION` | (1635, 600, 110, 100) | qyzz 检测区域 |
-| `RELAUNCH_QYZZ_CLICK` | (1695, 655) | qyzz 按钮 |
 | `RELAUNCH_CONTINUE_REGION` | (795, 860, 330, 90) | continue 检测区域 |
-| `RELAUNCH_CONTINUE_CLICK` | (870, 900) | continue 按钮 |
 | `RELAUNCH_PRECOND_REGION` | (475, 885, 35, 20) | 重连完成先决条件检测区域 |
 | `NET_RESET_REGION` | (645, 405, 630, 360) | 网络断连检测区域 |
 
