@@ -124,23 +124,18 @@ def run():
         if DEBUG:
             print(f"警告音 {i+1}/10")
         time.sleep(1)
-    pyautogui.moveTo(365, 25)
     pyautogui.click(365, 25)      # 新建标签页
     time.sleep(1)
-    pyautogui.moveTo(310, 30)
     pyautogui.click(310, 30)      # 关闭旧标签页
     time.sleep(1)
-    pyautogui.moveTo(40, 120)
     pyautogui.click(40, 120)      # 收藏夹
     time.sleep(1)
-    pyautogui.moveTo(85, 290)
     pyautogui.click(85, 290)      # 网页
     time.sleep(30)
 
     if not _wait_any(RELAUNCH_QYZZ_REGION, [_QYZZ1, _QYZZ2], "qyzz", True):
         ui.alarm("重连失败: qyzz 匹配超限")
         return
-    pyautogui.moveTo(105, 25)
     pyautogui.click(105, 25)      # 静音
     time.sleep(1)
     if not _wait(RELAUNCH_CONTINUE_REGION, _CONTINUE, "continue", True):
