@@ -45,6 +45,7 @@ def _wait(region, template, label, click_pos=None):
                     print(f"  {label} 匹配，点击 {center}")
                 # 内层循环：点击后等待画面变化，画面改变说明点击成功
                 for _ in range(RETRY_LIMIT):
+                    time.sleep(RELAUNCH_RETRY_INTERVAL)
                     s, c = _match(region, template)
                     if s < RELAUNCH_THRESHOLD:
                         return True
@@ -52,7 +53,6 @@ def _wait(region, template, label, click_pos=None):
                     pyautogui.click(*c)
                     if DEBUG:
                         print(f"  {label} 画面未改变，等待 {RELAUNCH_RETRY_INTERVAL}s 后再次点击 {c}")
-                    time.sleep(RELAUNCH_RETRY_INTERVAL)
                 return False
             else:
                 if DEBUG:
@@ -88,6 +88,7 @@ def _wait_any(region, templates, label, click_pos=None):
                 time.sleep(RELAUNCH_RETRY_INTERVAL)
                 # 内层循环：点击后等待画面变化，画面改变说明点击成功
                 for _ in range(RETRY_LIMIT):
+                    time.sleep(RELAUNCH_RETRY_INTERVAL)
                     still_match = False
                     for tmpl in templates:
                         s, _ = _match(region, tmpl)
@@ -100,7 +101,6 @@ def _wait_any(region, templates, label, click_pos=None):
                     pyautogui.click(*best_center)
                     if DEBUG:
                         print(f"  {label} 画面未改变，等待 {RELAUNCH_RETRY_INTERVAL}s 后再次点击 {best_center}")
-                    time.sleep(RELAUNCH_RETRY_INTERVAL)
                 return False
             else:
                 if DEBUG:
