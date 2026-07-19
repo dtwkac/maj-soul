@@ -51,7 +51,7 @@ def _wait(region, template, label, click_pos=None):
                     pyautogui.moveTo(*c)
                     pyautogui.click(*c)
                     if DEBUG:
-                        print(f"  [{time.strftime('%H:%M:%S')}] {label} 画面未改变，再次点击 {c}")
+                        print(f"  {label} 画面未改变，等待 {RELAUNCH_RETRY_INTERVAL}s 后再次点击 {c}")
                     time.sleep(RELAUNCH_RETRY_INTERVAL)
                 return False
             else:
@@ -99,7 +99,7 @@ def _wait_any(region, templates, label, click_pos=None):
                     pyautogui.moveTo(*best_center)
                     pyautogui.click(*best_center)
                     if DEBUG:
-                        print(f"  [{time.strftime('%H:%M:%S')}] {label} 画面未改变，再次点击 {best_center}")
+                        print(f"  {label} 画面未改变，等待 {RELAUNCH_RETRY_INTERVAL}s 后再次点击 {best_center}")
                     time.sleep(RELAUNCH_RETRY_INTERVAL)
                 return False
             else:
