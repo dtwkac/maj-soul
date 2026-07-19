@@ -75,6 +75,8 @@ def speedhack():
     time.sleep(1)
 
     # 步骤4: OCR查找进程
+    if DEBUG:
+        print("  [步骤4] OCR查找进程...")
     proc_region = {"left": 827, "top": 360, "width": 293, "height": 380}
     sct = mss.MSS()
 
