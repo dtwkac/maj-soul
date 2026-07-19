@@ -38,7 +38,7 @@ def kill_ce():
 def speedhack():
     # 步骤1: 获取firefox最大内存占用pid并转8位hex
     if DEBUG:
-        print("  [步骤1] 获取firefox PID...")
+        print("  [步骤1] 获取firefox PID")
     output = subprocess.check_output(
         ['tasklist', '/FI', 'IMAGENAME eq firefox.exe', '/FO', 'CSV', '/NH'],
         encoding='gbk'
@@ -60,7 +60,7 @@ def speedhack():
 
     # 步骤2: 启动CE
     if DEBUG:
-        print("  [步骤2] 启动CE...")
+        print("  [步骤2] 启动CE")
     subprocess.Popen([_CE_EXE])
     time.sleep(3)
     if not is_ce_running():
@@ -78,7 +78,7 @@ def speedhack():
 
     # 步骤4: OCR查找进程
     if DEBUG:
-        print("  [步骤4] OCR查找进程...")
+        print("  [步骤4] OCR查找进程")
     proc_region = {"left": 827, "top": 360, "width": 293, "height": 380}
     sct = mss.MSS()
 
@@ -147,8 +147,6 @@ def speedhack():
             if DEBUG:
                 print(f"  第{attempt+1}页 第{retry+1}次 OCR...")
             lines = ocr_lines()
-            if DEBUG:
-                print(f"  OCR行数: {len(lines)}")
             if find_and_click(lines):
                 found = True
                 break
