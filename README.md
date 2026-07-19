@@ -110,12 +110,11 @@ pics/
 |------|--------|------|
 | `THRESHOLD_DEFAULT` | 20 | 全局匹配数阈值 |
 | `NUM_ALARM` | 81 | 分数低于该值时报警 |
-| `RETRY_LIMIT` | 5 | OCR 分数异常重试上限 |
+| `RETRY_LIMIT` | 10 | OCR 分数异常/重连匹配重试上限 |
 | `LOOP_SLEEP` | 1.0 | 每轮循环间隔（秒） |
 | `SLEEP_INTERVAL` | 0.2 | 检测/重试刷新间隔（秒） |
 | `PRECONDITION_THRESHOLD` | 0.9 | 先决条件匹配阈值（TM_CCOEFF_NORMED） |
 | `RELAUNCH_THRESHOLD` | 0.9 | 重连画面匹配阈值 |
-| `RELAUNCH_INTERVAL` | 10 | 重连重试间隔（秒） |
 | `NET_RESET_THRESHOLD` | 0.9 | 网络断连画面匹配阈值 |
 
 ## 坐标配置
