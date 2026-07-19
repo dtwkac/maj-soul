@@ -31,24 +31,29 @@ def _match(region, template):
     center = (region[0] + loc[0] + tw // 2, region[1] + loc[1] + th // 2)
     return float(score), center
 
-def _wait(region, template, label):
+def _wait(region, template, label, click_pos=None):
     for attempt in range(1, RETRY_LIMIT + 1):
         score, center = _match(region, template)
         if DEBUG:
             print(f"  [{attempt}/{RETRY_LIMIT}] {label} 匹配度: {score:.3f}")
         if score >= RELAUNCH_THRESHOLD:
-            pyautogui.click(*center)
-            if DEBUG:
-                print(f"  {label} 匹配，点击 {center}")
-            time.sleep(5)
-            while True:
-                s, c = _match(region, template)
-                if s < RELAUNCH_THRESHOLD:
-                    break
-                pyautogui.click(*c)
+            if click_pos is not False:
+                pyautogui.click(*center)
                 if DEBUG:
-                    print(f"  {label} 画面未改变，再次点击 {c}")
-                time.sleep(5)
+                    print(f"  {label} 匹配，点击 {center}")
+            else:
+                if DEBUG:
+                    print(f"  {label} 匹配")
+            time.sleep(5)
+            if click_pos is not False:
+                while True:
+                    s, c = _match(region, template)
+                    if s < RELAUNCH_THRESHOLD:
+                        break
+                    pyautogui.click(*c)
+                    if DEBUG:
+                        print(f"  {label} 画面未改变，再次点击 {c}")
+                    time.sleep(5)
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
@@ -57,7 +62,7 @@ def _wait(region, template, label):
     print(f"  重连失败: {label} 匹配超限")
     return False
 
-def _wait_any(region, templates, label):
+def _wait_any(region, templates, label, click_pos=None):
     for attempt in range(1, RETRY_LIMIT + 1):
         best_score = 0
         best_center = None
@@ -71,23 +76,28 @@ def _wait_any(region, templates, label):
             if DEBUG:
                 print(f"  [{attempt}/{RETRY_LIMIT}] {label}[{i+1}] 匹配度: {score:.3f}")
         if best_score >= RELAUNCH_THRESHOLD:
-            pyautogui.click(*best_center)
-            if DEBUG:
-                print(f"  {label} 匹配(模板{best_idx+1})，点击 {best_center}")
-            time.sleep(5)
-            while True:
-                still_match = False
-                for tmpl in templates:
-                    s, _ = _match(region, tmpl)
-                    if s >= RELAUNCH_THRESHOLD:
-                        still_match = True
-                        break
-                if not still_match:
-                    break
+            if click_pos is not False:
                 pyautogui.click(*best_center)
                 if DEBUG:
-                    print(f"  {label} 画面未改变，再次点击 {best_center}")
-                time.sleep(5)
+                    print(f"  {label} 匹配(模板{best_idx+1})，点击 {best_center}")
+            else:
+                if DEBUG:
+                    print(f"  {label} 匹配(模板{best_idx+1})")
+            time.sleep(5)
+            if click_pos is not False:
+                while True:
+                    still_match = False
+                    for tmpl in templates:
+                        s, _ = _match(region, tmpl)
+                        if s >= RELAUNCH_THRESHOLD:
+                            still_match = True
+                            break
+                    if not still_match:
+                        break
+                    pyautogui.click(*best_center)
+                    if DEBUG:
+                        print(f"  {label} 画面未改变，再次点击 {best_center}")
+                    time.sleep(5)
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
@@ -116,15 +126,15 @@ def run():
     pyautogui.click(85, 290)      # 网页
     time.sleep(30)
 
-    if not _wait_any(RELAUNCH_QYZZ_REGION, [_QYZZ1, _QYZZ2], "qyzz"):
+    if not _wait_any(RELAUNCH_QYZZ_REGION, [_QYZZ1, _QYZZ2], "qyzz", True):
         ui.alarm("重连失败: qyzz 匹配超限")
         return
     pyautogui.click(105, 25)      # 静音
     time.sleep(1)
-    if not _wait(RELAUNCH_CONTINUE_REGION, _CONTINUE, "continue"):
+    if not _wait(RELAUNCH_CONTINUE_REGION, _CONTINUE, "continue", True):
         ui.alarm("重连失败: continue 匹配超限")
         return
-    if not _wait(RELAUNCH_PRECOND_REGION, _PRECOND, "先决条件"):
+    if not _wait(RELAUNCH_PRECOND_REGION, _PRECOND, "先决条件", False):
         ui.alarm("重连失败: 先决条件匹配超限")
         return
     print(f"[{time.strftime('%H:%M:%S')}] 重连完成")

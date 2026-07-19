@@ -65,14 +65,14 @@ def do_restart():
         time.sleep(1)
         pyautogui.click(85, 290)
         time.sleep(30)
-        if not relaunch._wait_any(relaunch.RELAUNCH_QYZZ_REGION, [relaunch._QYZZ1, relaunch._QYZZ2], "qyzz"):
+        if not relaunch._wait_any(relaunch.RELAUNCH_QYZZ_REGION, [relaunch._QYZZ1, relaunch._QYZZ2], "qyzz", True):
             print(f"[{time.strftime('%H:%M:%S')}] 重启失败: qyzz 超限")
             return False
         pyautogui.click(105, 25)
-        if not relaunch._wait(RELAUNCH_CONTINUE_REGION, relaunch._CONTINUE, "continue"):
+        if not relaunch._wait(RELAUNCH_CONTINUE_REGION, relaunch._CONTINUE, "continue", True):
             print(f"[{time.strftime('%H:%M:%S')}] 重启失败: continue 超限")
             return False
-        if not relaunch._wait_any(PRECOND_REGION, [_PRECOND_TEMPLATE1, _PRECOND_TEMPLATE2], "先决条件"):
+        if not relaunch._wait_any(PRECOND_REGION, [_PRECOND_TEMPLATE1, _PRECOND_TEMPLATE2], "先决条件", False):
             print(f"[{time.strftime('%H:%M:%S')}] 重启失败: 先决条件超限")
             return False
         print(f"[{time.strftime('%H:%M:%S')}] 重启完成")
