@@ -37,6 +37,8 @@ def kill_ce():
 
 def speedhack():
     # 步骤1: 获取firefox最大内存占用pid并转8位hex
+    if DEBUG:
+        print("  [步骤1] 获取firefox PID...")
     output = subprocess.check_output(
         ['tasklist', '/FI', 'IMAGENAME eq firefox.exe', '/FO', 'CSV', '/NH'],
         encoding='gbk'
