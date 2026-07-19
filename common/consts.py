@@ -29,6 +29,7 @@ TARGET_NAMES = {os.path.splitext(f)[0] for f in os.listdir(TARGET_DIR) if f.uppe
 ALARM_TIMEOUT = 600
 
 RELAUNCH_THRESHOLD = 0.9
+RELAUNCH_RETRY_INTERVAL = 2
 RELAUNCH_DIR = r'D:\workspace\maj-soul\pics\relaunch'
 RELAUNCH_QYZZ_REGION = (1635, 600, 110, 100)
 RELAUNCH_CONTINUE_REGION = (795, 860, 330, 90)

@@ -6,7 +6,7 @@ import pyautogui
 import winsound
 import sys
 from common import ui
-from common.consts import RETRY_LIMIT, RELAUNCH_THRESHOLD
+from common.consts import RETRY_LIMIT, RELAUNCH_THRESHOLD, RELAUNCH_RETRY_INTERVAL
 
 DEBUG = '--debug' in sys.argv
 from common.consts import RELAUNCH_DIR, RELAUNCH_QYZZ_REGION
@@ -52,7 +52,7 @@ def _wait(region, template, label, click_pos=None):
                     pyautogui.click(*c)
                     if DEBUG:
                         print(f"  {label} 画面未改变，再次点击 {c}")
-                    time.sleep(3)
+                    time.sleep(RELAUNCH_RETRY_INTERVAL)
                 return False
             else:
                 if DEBUG:
@@ -60,8 +60,8 @@ def _wait(region, template, label, click_pos=None):
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
-                print(f"  等待 1s 后重试...")
-            time.sleep(1)
+                print(f"  等待 {RELAUNCH_RETRY_INTERVAL}s 后重试...")
+            time.sleep(RELAUNCH_RETRY_INTERVAL)
     print(f"  重连失败: {label} 匹配超限")
     return False
 
@@ -85,7 +85,7 @@ def _wait_any(region, templates, label, click_pos=None):
                 pyautogui.click(*best_center)
                 if DEBUG:
                     print(f"  {label} 匹配(模板{best_idx+1})，点击 {best_center}")
-                time.sleep(3)
+                time.sleep(RELAUNCH_RETRY_INTERVAL)
                 # 内层循环：点击后等待画面变化，画面改变说明点击成功
                 for _ in range(RETRY_LIMIT):
                     still_match = False
@@ -100,7 +100,7 @@ def _wait_any(region, templates, label, click_pos=None):
                     pyautogui.click(*best_center)
                     if DEBUG:
                         print(f"  {label} 画面未改变，再次点击 {best_center}")
-                    time.sleep(3)
+                    time.sleep(RELAUNCH_RETRY_INTERVAL)
                 return False
             else:
                 if DEBUG:
@@ -108,8 +108,8 @@ def _wait_any(region, templates, label, click_pos=None):
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
-                print(f"  等待 1s 后重试...")
-            time.sleep(1)
+                print(f"  等待 {RELAUNCH_RETRY_INTERVAL}s 后重试...")
+            time.sleep(RELAUNCH_RETRY_INTERVAL)
     print(f"  重连失败: {label} 匹配超限")
     return False
 
