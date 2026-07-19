@@ -60,7 +60,7 @@ def _wait(region, template, label, click_pos=None):
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
-                print(f"  等待 {RELAUNCH_RETRY_INTERVAL}s 后重试...")
+                print(f"  {label} 区域不匹配，等待 {RELAUNCH_RETRY_INTERVAL}s 后重试...")
             time.sleep(RELAUNCH_RETRY_INTERVAL)
     print(f"  重连失败: {label} 匹配超限")
     return False
@@ -108,7 +108,7 @@ def _wait_any(region, templates, label, click_pos=None):
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
-                print(f"  等待 {RELAUNCH_RETRY_INTERVAL}s 后重试...")
+                print(f"  {label} 区域不匹配，等待 {RELAUNCH_RETRY_INTERVAL}s 后重试...")
             time.sleep(RELAUNCH_RETRY_INTERVAL)
     print(f"  重连失败: {label} 匹配超限")
     return False
