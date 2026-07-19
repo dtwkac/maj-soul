@@ -125,7 +125,7 @@ tools/
 | `TILE_REGION` | (450, 885, 90, 140) | 牌面截图区域 (left, top, width, height) |
 | `NUM_REGION` | (365, 805, 125, 30) | 分数数字区域 |
 | `CENTER` | (960, 540) | 屏幕中心（连点/鼠标复位） |
-| `TSUMO_BTN` | (1200, 820) | 自摸按钮 |
+| `TSUMO_BTN` | (1200, 815) | 自摸按钮 |
 | `SKIP_BTN` | (500, 950) | 跳过按钮 |
 | `RELAUNCH_QYZZ_REGION` | (1635, 600, 110, 100) | qyzz 检测区域 |
 | `RELAUNCH_QYZZ_CLICK` | (1695, 655) | qyzz 按钮 |

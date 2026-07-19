@@ -7,9 +7,10 @@ import mss
 import traceback
 import keyboard
 import sys
+import random
 
 import ui
-from consts import LOOP_SLEEP, SLEEP_INTERVAL
+from consts import LOOP_SLEEP, SLEEP_INTERVAL, TSUMO_BTN as _TSUMO_BTN
 
 DEBUG = '--debug' in sys.argv
 
@@ -20,7 +21,6 @@ ZI_THRESHOLD = 20
 
 _CENTER = (960, 540)
 _SKIP_BTN = (1430, 950)
-_TSUMO_BTN = (1200, 820)
 
 _ZI_DIR = r'D:\workspace\maj-soul\pics\zi'
 _PRECOND_TEMPLATE1 = cv2.imread(r'D:\workspace\maj-soul\pics\pre1.png', cv2.IMREAD_GRAYSCALE)
@@ -124,7 +124,9 @@ def main():
                         print(f"[{time.strftime('%H:%M:%S')}] 未匹配字牌 → 自摸")
                 pyautogui.moveTo(*_TSUMO_BTN)
                 time.sleep(0.1)
-                pyautogui.click(*_TSUMO_BTN)
+                dx = random.randint(-5, 5)
+                dy = random.randint(-5, 5)
+                pyautogui.click(_TSUMO_BTN[0] + dx, _TSUMO_BTN[1] + dy)
                 for _ in range(25):
                     pyautogui.click(*_CENTER)
                     time.sleep(0.1)

@@ -1,9 +1,8 @@
 import pyautogui
 import keyboard
 import time
+from consts import CENTER, TSUMO_BTN
 
-CENTER = (960, 540)
-TSUMO_BTN = (1200, 820)
 paused = True
 
 def toggle():

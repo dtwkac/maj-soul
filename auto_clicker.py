@@ -9,7 +9,7 @@ import cv2
 import mss
 import numpy as np
 import pytesseract
-from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER
+from consts import RELAUNCH_CONTINUE_REGION, RELAUNCH_CONTINUE_CLICK, CENTER, TSUMO_BTN
 from speedhack import speedhack, kill_ce
 import ui
 
@@ -17,7 +17,6 @@ pyautogui.PAUSE = 0
 
 DEBUG = '--debug' in sys.argv
 
-TSUMO_BTN = (1200, 815)
 INTERVAL = 0.2
 DETECT_INTERVAL = 5
 _DETECT_REGION = {"left": 1470, "top": 630, "width": 30, "height": 12}
@@ -130,7 +129,7 @@ try:
                         restart_with_speedhack()
                         prev_rounds = None
                         prev_check = None
-                        same_count = 0
+                        same_count = 1
                         check_count = 0
             else:
                 prev_rounds = rounds
