@@ -138,10 +138,8 @@ def speedhack():
     for attempt in range(5):
         if attempt > 0:
             pyautogui.press('pageup')
-        time.sleep(1)
-        for retry in range(3):
-            if retry > 0:
-                time.sleep(1)
+        for retry in range(2):
+            time.sleep(1)
             if DEBUG:
                 print(f"  第{attempt+1}页 第{retry+1}次 OCR...")
             lines = ocr_lines()
