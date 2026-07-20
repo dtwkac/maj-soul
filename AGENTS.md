@@ -68,8 +68,8 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - 每轮: 合并截屏(capture, 175x223) -> 视图切片取牌面/分数 ROI -> 卡住检测（与上轮截图比较，连续3次相同则悬停跳过按钮重截图，仍相同则播放10次警告音后触发重连(relaunch.run)；仅 DEBUG 打印重复次数） -> 先决条件检测(tile_matcher.check_precondition, TM_CCOEFF_NORMED，不满足时重试） -> ORB BFMatcher(best_match, 无重试一次出结果） -> 网络断连检测（记录识别结果，连续5次相同时截图对比 net_reset.png；匹配则重连） -> OCR 分数检测(score_reader.check_number） -> 自摸/跳过
 - 重连模块 `relaunch.py`：`run()` 时打印 `[HH:MM:SS]` 时刻，模块级 `RESTART_COUNT` / `LAST_RESTART` 追踪；依次新建标签页、匹配 qyzz 画面（静音）、匹配 continue 画面、匹配先决条件；DEBUG 模式打印匹配进度和「警告音 x/10」。全部成功后返回 True；任一步骤超限返回 False
   - `_match(region, template)`：截屏+灰度+TM_CCOEFF_NORMED，返回 `(score, center)`
-  - `_wait(region, template, label, click_pos=None)`：外层循环检测匹配（`RETRY_LIMIT` 次，间隔 1s），匹配后 `click_pos` 不为 False 则点击中心；内层循环等待画面变化（`RETRY_LIMIT` 次，间隔 3s），超限返回 False
-  - `_wait_any(region, templates, label, click_pos=None)`：同 `_wait`，但同时匹配多个模板取最高分
+  - `_wait_for_match(region, template, label, click_pos=None)`：外层循环检测匹配（`RETRY_LIMIT` 次，间隔 `RELAUNCH_RETRY_INTERVAL`s），匹配后 `click_pos` 不为 False 则点击中心；内层循环等待画面变化（`RETRY_LIMIT` 次，间隔 `RELAUNCH_RETRY_INTERVAL`s），超限返回 False
+  - `_wait_for_match_multi(regions, templates, label, click_pos=None)`：同 `_wait_for_match`，但支持多区域多模板 zip 配对；regions/templates 传单个值自动扩展
   - `click_pos` 参数：`None`/`True`=点击匹配中心，`False`=仅检测不点击（用于先决条件）
 - ORB nfeatures=200，检测器与 BFMatcher 在模块级缓存（`tile_matcher._ORB` / `tile_matcher._BF`），每圈不重复构造
 - OCR 灰度图 8 倍放大 + 阈值180二值化后直出 Tesseract，PSM 7 + whitelist 0123456789/，分数大幅下降时连续两次一致即接受；诊断日志（不匹配详情/等待稳定）仅 DEBUG 打印
@@ -91,4 +91,4 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `restart_with_speedhack()` 封装循环：`do_restart()` 失败持续重试，成功后调用 `speedhack()`，失败则重新 `do_restart()`
 - `do_restart()` 返回 bool：依次新建标签页、匹配 qyzz/continue/先决条件，失败打印日志返回 False，成功返回 True
 - `speedhack()` 返回 bool：启动前调用 `kill_ce()`（sleep 1s）关闭已有 CE 进程（进程名 `cheatengine-x86_64-SSE4-AVX2.exe`）
-- 步骤：tasklist 获取最大内存 firefox PID -> 转8位hex -> 命令行启动CE（`Cheat Engine.exe`，检测实际进程是否运行） -> OCR识别进程列表（截屏区域 left=827） -> 逐字符比对pid16精确匹配（无容差） -> 页翻找（pagedownx3到底，pageup最多5次，每页重试2次，每次等待1s） -> 点击Open -> Enable Speedhack -> Ctrl+A全选+Backspace清除+输入5 -> 悬停1s -> Apply -> firefox回前台
+- 步骤：tasklist 获取最大内存 firefox PID -> 转8位hex -> `os.startfile` 启动CE（`Cheat Engine.exe`，检测实际进程是否运行） -> OCR识别进程列表（截屏区域 left=827） -> 逐字符比对pid16精确匹配（无容差） -> 页翻找（pagedownx3到底，pageup最多5次，每页重试2次，每次等待1s） -> 点击Open -> Enable Speedhack -> Ctrl+A全选+Backspace清除+输入5 -> 悬停1s -> Apply -> firefox回前台
