@@ -133,7 +133,7 @@ def run():
     pyautogui.click(85, 290)      # 网页
     time.sleep(30)
 
-    if not _wait_any(RELAUNCH_QYZZ_REGION, [_QYZZ1, _QYZZ2], "qyzz", True):
+    if not _wait(RELAUNCH_QYZZ_REGION, _QYZZ1, "qyzz", True):
         ui.alarm("重连失败: qyzz 匹配超限")
         return
     pyautogui.click(105, 25)      # 静音
