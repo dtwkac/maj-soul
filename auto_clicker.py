@@ -29,8 +29,6 @@ SIMILARITY_THRESHOLD = 0.99
 
 _sct = mss.MSS()
 
-relaunch.RELAUNCH_QYZZ_REGION = (1635, 720, 110, 100)
-
 _orig_play = winsound.PlaySound
 
 paused = False

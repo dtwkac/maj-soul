@@ -66,15 +66,18 @@ def _wait_for_match(region, template, label, click_pos=None):
     return False
 
 def _wait_for_match_multi(regions, templates, label, click_pos=None):
-    # regions 与 templates 一一对应检测匹配；传单个tuple则自动复制
+    # regions 与 templates 一一对应检测匹配；单个值自动扩展为等长列表后 zip
     if isinstance(regions, tuple):
-        regions = [regions] * len(templates)
+        regions = [regions] * max(len(templates), 1)
+    if isinstance(templates, cv2.typing.MatLike):
+        templates = [templates] * max(len(regions), 1)
+    pairs = list(zip(regions, templates))
     # 外层循环：检测匹配，若匹配则点击
     for attempt in range(1, RETRY_LIMIT + 1):
         best_score = 0
         best_center = None
         best_idx = 0
-        for i, (r, tmpl) in enumerate(zip(regions, templates)):
+        for i, (r, tmpl) in enumerate(pairs):
             score, center = _match(r, tmpl)
             if score > best_score:
                 best_score = score
@@ -87,13 +90,13 @@ def _wait_for_match_multi(regions, templates, label, click_pos=None):
                 pyautogui.moveTo(*best_center)
                 pyautogui.click(*best_center)
                 if DEBUG:
-                    print(f"  {label} 匹配(模板{best_idx+1})，点击 {best_center}")
+                    print(f"  {label} 匹配(组合{best_idx+1})，点击 {best_center}")
                 time.sleep(RELAUNCH_RETRY_INTERVAL)
                 # 内层循环：点击后等待画面变化，画面改变说明点击成功
                 for _ in range(RETRY_LIMIT):
                     time.sleep(RELAUNCH_RETRY_INTERVAL)
                     still_match = False
-                    for r, tmpl in zip(regions, templates):
+                    for r, tmpl in pairs:
                         s, _ = _match(r, tmpl)
                         if s >= RELAUNCH_THRESHOLD:
                             still_match = True
@@ -107,7 +110,7 @@ def _wait_for_match_multi(regions, templates, label, click_pos=None):
                 return False
             else:
                 if DEBUG:
-                    print(f"  {label} 匹配(模板{best_idx+1})")
+                    print(f"  {label} 匹配(组合{best_idx+1})")
             return True
         if attempt < RETRY_LIMIT:
             if DEBUG:
@@ -136,7 +139,7 @@ def run():
     pyautogui.click(85, 290)      # 网页
     time.sleep(30)
 
-    if not _wait_for_match(RELAUNCH_QYZZ_REGION, _QYZZ1, "qyzz", True):
+    if not _wait_for_match_multi(RELAUNCH_QYZZ_REGION, [_QYZZ1, _QYZZ2], "qyzz", True):
         ui.alarm("重连失败: qyzz 匹配超限")
         return
     pyautogui.click(105, 25)      # 静音
