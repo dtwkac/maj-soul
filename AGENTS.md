@@ -81,11 +81,9 @@ uv run python tools/threshold_test.py  # 阈值检测测试工具
 - `pyproject.toml` 是唯一项目配置；无 formatter/linter 配置，格式自由
 
 ### auto_clicker 卡住检测
-- 每轮截取 `_CHECK_REGION`(830,450)-(1025,600) 灰度图
-- OCR值连续2次相同时，比较本轮与上一轮check区域匹配度（TM_CCOEFF_NORMED）
-- 匹配度>=`SIMILARITY_THRESHOLD`(0.99) -> check_count+1，否则归零
-- check_count连续>=3 -> 确认卡住，执行重启
-- OCR值变化时全部归零
+- 每轮截取 `_CHECK_REGION`(1005,735)-(1120,815) 灰度图
+- 与上一轮截图像素对比匹配度（TM_CCOEFF_NORMED），>=`SIMILARITY_THRESHOLD`(0.99) -> same_count+1，否则归零
+- same_count连续>=`STUCK_LIMIT`(5) -> 确认卡住，执行重启
 
 ### speedhack 流程
 - `restart_with_speedhack()` 封装循环：`do_restart()` 失败持续重试，成功后调用 `speedhack()`，失败则重新 `do_restart()`

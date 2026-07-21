@@ -18,13 +18,14 @@ pyautogui.PAUSE = 0
 DEBUG = '--debug' in sys.argv
 
 INTERVAL = 0.2
-DETECT_INTERVAL = 5
+DETECT_INTERVAL = 2
 PRECOND_REGION = (1415, 885, 30, 20)
 _PRECOND_TEMPLATE1 = cv2.imread('pics/pre1.png', cv2.IMREAD_GRAYSCALE)
 _PRECOND_TEMPLATE2 = cv2.imread('pics/pre2.png', cv2.IMREAD_GRAYSCALE)
 # 卡住检测区域
 _CHECK_REGION = {"left": 1005, "top": 735, "width": 115, "height": 80}
 SIMILARITY_THRESHOLD = 0.99
+STUCK_LIMIT = 8
 
 _sct = mss.MSS()
 
@@ -101,9 +102,9 @@ try:
                 else:
                     same_count = 0
                 if DEBUG:
-                    print(f"  卡住检测 same_count={same_count}/3 匹配度{max_val:.3f}")
-                if same_count >= 3:
-                    print(f"[{time.strftime('%H:%M:%S')}] 连续3次画面相同，确认卡住")
+                    print(f"  卡住检测 same_count={same_count}/{STUCK_LIMIT} 匹配度{max_val:.3f}")
+                if same_count >= STUCK_LIMIT:
+                    print(f"[{time.strftime('%H:%M:%S')}] 连续{STUCK_LIMIT}次画面相同，确认卡住")
                     restart_with_speedhack()
                     prev_check = None
                     same_count = 0
