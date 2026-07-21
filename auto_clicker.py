@@ -103,6 +103,9 @@ try:
                     same_count = 0
                 if DEBUG:
                     print(f"  卡住检测 same_count={same_count}/{STUCK_LIMIT} 匹配度{max_val:.3f}")
+                if same_count >= 5:
+                    winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
+                    time.sleep(1)
                 if same_count >= STUCK_LIMIT:
                     print(f"[{time.strftime('%H:%M:%S')}] 连续{STUCK_LIMIT}次画面相同，确认卡住")
                     restart_with_speedhack()
